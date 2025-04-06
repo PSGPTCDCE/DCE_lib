@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Test</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #87CEEB, #ADD8E6);
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            margin: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            text-align: center;
+            color: #1E90FF;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            height: 15px;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #1E90FF, #87CEEB);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .question:hover {
+            transform: translateY(-5px);
+        }
+
+        .question p {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #444;
+        }
+
+        .options label {
+            display: block;
+            margin: 10px 0;
+            padding: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .options label:hover {
+            background: #f1f1f1;
+            border-color: #1E90FF;
+        }
+
+        .options input[type="radio"]:checked + label {
+            background: #1E90FF;
+            color: white;
+            border-color: #1E90FF;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #1E90FF, #87CEEB);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(30, 144, 255, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .result h2 {
+            color: #1E90FF;
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        .result p {
+            margin: 10px 0;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        .correct {
+            color: #2ecc71;
+        }
+
+        .incorrect {
+            color: #e74c3c;
+        }
+
+        .correct-answer {
+            background-color: #d4edda; /* Light green */
+            border: 2px solid #c3e6cb; /* Darker green */
+        }
+
+        .wrong-answer {
+            background-color: #f8d7da; /* Light red */
+            border: 2px solid #f5c6cb; /* Darker red */
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .timer {
+                font-size: 1.2em;
+            }
+
+            .question {
+                padding: 15px;
+            }
+
+            .options label {
+                padding: 10px;
+            }
+
+            button {
+                padding: 12px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Professional IQ Test</h1>
+        <div class="timer">Time Left: <span id="time">05:00</span></div>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div id="quiz"></div>
+        <button id="submit-btn" onclick="submitQuiz()" disabled>Submit</button>
+        <div id="result" class="hidden result">
+            <h2>Your Results 🎉</h2>
+            <p>Your approximate IQ score: <span id="iq-score"></span></p>
+            <p>Correct Answers: <span id="correct-answers" class="correct"></span> ✅</p>
+            <p>Incorrect Answers: <span id="incorrect-answers" class="incorrect"></span> ❌</p>
+            <button onclick="saveResults()">Save Results</button>
+            <button onclick="restartQuiz()">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const categories = {
+            "Mathematical Reasoning": [
+                { question: "If an item costs $120 after a 20% discount, what was the original price?", options: ["$140", "$150", "$160", "$180"], answer: "$150" },
+                { question: "Solve: (5 + 3) × 2 - 4", options: ["10", "12", "14", "16"], answer: "12" },
+                { question: "What is the derivative of 3x²?", options: ["3x", "6x", "9x", "x²"], answer: "6x" },
+                { question: "If log₂x = 3, what is the value of x?", options: ["4", "6", "8", "12"], answer: "8" },
+                { question: "A car depreciates 10% per year. If its initial value is $10,000, what is its value after 2 years?", options: ["$7,900", "$8,100", "$8,200", "$8,500"], answer: "$8,100" },
+                { question: "Solve: 3x - 5 = 10", options: ["3", "5", "7", "10"], answer: "5" },
+                { question: "What is the cube root of 27?", options: ["2", "3", "4", "5"], answer: "3" },
+                { question: "A bag contains 5 red and 7 blue balls. What is the probability of picking a red ball?", options: ["5/12", "7/12", "1/2", "1/3"], answer: "5/12" },
+                { question: "If a triangle has angles 40° and 90°, what is the third angle?", options: ["30°", "45°", "50°", "60°"], answer: "50°" },
+                { question: "The sum of the interior angles of a pentagon is?", options: ["360°", "540°", "720°", "900°"], answer: "540°" }
+            ],
+            "Logical Thinking": [
+                { question: "A crime suspect always lies on Mondays, Tuesdays, and Wednesdays. On other days, he tells the truth. If he says 'I lied yesterday' on a Thursday, which day is it?", options: ["Monday", "Tuesday", "Wednesday", "Thursday"], answer: "Wednesday" },
+                { question: "If 6 people can complete a task in 12 days, how many days will it take for 3 people?", options: ["24", "20", "18", "12"], answer: "24" },
+                { question: "Identify the pattern: 1, 3, 6, 10, 15, ?", options: ["20", "21", "22", "25"], answer: "21" },
+                { question: "If A = 1, B = 2, ..., Z = 26, what is the sum of the letters in 'CODE'?", options: ["27", "30", "35", "40"], answer: "27" },
+                { question: "A man is looking at a picture of someone. His friend asks, 'Who is it?' He replies, 'Brothers and sisters, I have none. But that man's father is my father's son.' Who is in the picture?", options: ["His father", "His son", "His uncle", "Himself"], answer: "His son" },
+                { question: "If all roses are flowers and some flowers fade quickly, which statement must be true?", options: ["All roses fade quickly", "Some flowers are roses", "Some roses may fade quickly", "No roses fade quickly"], answer: "Some roses may fade quickly" },
+                { question: "Which number should come next in the series? 2, 6, 12, 20, ?", options: ["28", "30", "32", "34"], answer: "30" },
+                { question: "A is the mother of B, and B is the brother of C. How is A related to C?", options: ["Mother", "Grandmother", "Aunt", "Sister"], answer: "Mother" },
+                { question: "If a car’s wheels rotate 500 times in 1 km, how many rotations in 5 km?", options: ["1500", "2000", "2500", "3000"], answer: "2500" },
+                { question: "A train moving at 60 km/h takes 1 minute to cross a bridge. If the train is 500 meters long, how long is the bridge?", options: ["100m", "200m", "300m", "500m"], answer: "500m" }
+            ],
+            "Verbal Reasoning": [
+                { question: "What is the meaning of 'ephemeral'?", options: ["Eternal", "Temporary", "Difficult", "Large"], answer: "Temporary" },
+                { question: "Choose the correct word: He was ______ to accept the new policy.", options: ["Adverse", "Averse", "Advocate", "Absolve"], answer: "Averse" },
+                { question: "Which sentence is grammatically correct?", options: ["She don’t like coffee.", "He has went to the store.", "They were going to the mall.", "Me and him was late."], answer: "They were going to the mall." },
+                { question: "What is the synonym of 'pervasive'?", options: ["Rare", "Omnipresent", "Local", "Scattered"], answer: "Omnipresent" },
+                { question: "Which word is an antonym of 'mitigate'?", options: ["Alleviate", "Reduce", "Aggravate", "Moderate"], answer: "Aggravate" },
+                { question: "What is the synonym of 'benevolent'?", options: ["Cruel", "Kind", "Selfish", "Greedy"], answer: "Kind" },
+                { question: "Choose the correct word: He is known for his _______ behavior.", options: ["Erratic", "Erroneous", "Euphoric", "Ethereal"], answer: "Erratic" },
+                { question: "What is the antonym of 'obscure'?", options: ["Vague", "Hidden", "Clear", "Unknown"], answer: "Clear" },
+                { question: "Identify the correct sentence:", options: ["She don’t know anything.", "He has gone to school.", "Me and him went to the market.", "Him is a good person."], answer: "He has gone to school." },
+                { question: "Which word is closest in meaning to 'melancholy'?", options: ["Happy", "Sad", "Excited", "Angry"], answer: "Sad" }
+            ],
+            "Spatial Reasoning": [
+                { question: "A cube is placed on a table. If it is rotated 90° clockwise, how does its orientation change?", options: ["Top face remains the same", "Bottom face moves to the side", "Front face becomes the top", "Left face becomes right"], answer: "Top face remains the same" },
+                { question: "Which shape can be folded into a cube?", options: ["T-shape", "Cross-shape", "L-shape", "Z-shape"], answer: "Cross-shape" },
+                { question: "How many faces does a dodecahedron have?", options: ["6", "8", "12", "20"], answer: "12" },
+                { question: "If a clock is reflected in a mirror and shows 3:15, what is the actual time?", options: ["8:45", "9:45", "9:15", "10:15"], answer: "9:45" },
+                { question: "Which net corresponds to a rectangular prism?", options: ["Four rectangles and two squares", "Six identical squares", "Three triangles and three rectangles", "One square and four triangles"], answer: "Four rectangles and two squares" },
+                { question: "A cube has how many edges?", options: ["6", "8", "12", "16"], answer: "12" },
+                { question: "If a square is folded diagonally, what shape is formed?", options: ["Triangle", "Rectangle", "Pentagon", "Hexagon"], answer: "Triangle" },
+                { question: "How many faces does a cylinder have?", options: ["1", "2", "3", "4"], answer: "3" },
+                { question: "If a mirror reflects 5:30, what is the actual time?", options: ["6:30", "7:30", "8:30", "4:30"], answer: "6:30" },
+                { question: "Which 3D shape has only one vertex?", options: ["Cube", "Sphere", "Cone", "Cylinder"], answer: "Cone" }
+            ],
+            "Analogies": [
+                { question: "Pen is to Writer as Brush is to?", options: ["Artist", "Musician", "Scientist", "Pilot"], answer: "Artist" },
+                { question: "Night is to Dark as Day is to?", options: ["Bright", "Sun", "Clouds", "Stars"], answer: "Bright" },
+                { question: "Oxygen is to Breathing as Food is to?", options: ["Living", "Eating", "Drinking", "Hunger"], answer: "Eating" },
+                { question: "Lock is to Key as Door is to?", options: ["Knob", "House", "Window", "Wall"], answer: "Knob" },
+                { question: "Gills are to Fish as Lungs are to?", options: ["Mammals", "Reptiles", "Birds", "Insects"], answer: "Mammals" },
+                { question: "Cat is to Kitten as Dog is to?", options: ["Pup", "Calf", "Foal", "Cub"], answer: "Pup" },
+                { question: "Fire is to Burn as Ice is to?", options: ["Freeze", "Melt", "Cold", "Chill"], answer: "Melt" },
+                { question: "Book is to Reading as Piano is to?", options: ["Music", "Writing", "Dancing", "Painting"], answer: "Music" },
+                { question: "Doctor is to Hospital as Teacher is to?", options: ["School", "Library", "Office", "Laboratory"], answer: "School" },
+                { question: "Sun is to Day as Moon is to?", options: ["Night", "Morning", "Evening", "Noon"], answer: "Night" }
+            ],
+            "Pattern Recognition": [
+                { question: "What comes next? 2, 6, 12, 20, 30, ?", options: ["36", "40", "42", "44"], answer: "42" },
+                { question: "Find the missing number: 1, 4, 9, 16, ?, 36", options: ["20", "25", "30", "32"], answer: "25" },
+                { question: "Identify the pattern: AB, CD, EF, GH, ?", options: ["IJ", "JK", "KL", "LM"], answer: "IJ" },
+                { question: "Which number does not belong?  8, 27, 64, 100, 125", options: ["8", "27", "100", "125"], answer: "100" },
+                { question: "Which letter is missing? M, T, W, T, F, ?", options: ["S", "T", "U", "V"], answer: "S" },
+                { question: "Find the missing number: 5, 10, 20, 40, ?", options: ["50", "60", "80", "100"], answer: "80" },
+                { question: "Identify the missing letter: B, D, F, H, ?", options: ["I", "J", "K", "L"], answer: "J" },
+                { question: "What comes next? 1, 4, 9, 16, ?", options: ["20", "24", "25", "30"], answer: "25" },
+                { question: "Which number does not belong? 16, 36, 49, 81, 100", options: ["36", "49", "81", "100"], answer: "49" },
+                { question: "What comes next? A1, B2, C3, D4, ?", options: ["E5", "F5", "G6", "E6"], answer: "E5" }
+            ],
+            "Problem-Solving": [
+                { question: "You have a 3-liter and a 5-liter jug. How can you measure exactly 4 liters?", options: ["Fill 5L, pour into 3L, empty, repeat", "Fill 3L, pour into 5L, fill again", "Fill 5L, pour 3L out", "Fill 5L, pour into 3L, then refill 2L"], answer: "Fill 5L, pour into 3L, empty, repeat" },
+                { question: "A farmer has 3 chickens, 2 cows, and 4 pigs. How many legs are there in total?", options: ["22", "24", "26", "28"], answer: "26" },
+                { question: "A rope is cut into 3 equal parts. If the original length was 12 meters, what is the length of each piece?", options: ["2m", "3m", "4m", "6m"], answer: "4m" },
+                { question: "A and B start at the same point and walk in opposite directions for 10 meters. How far apart are they?", options: ["10m", "15m", "20m", "25m"], answer: "20m" },
+                { question: "Which number is the odd one out? 64, 81, 100, 121, 144", options: ["64", "81", "100", "121"], answer: "64" },
+                { question: "A farmer has 3 cows, 2 sheep, and 4 chickens. How many legs in total?", options: ["20", "24", "26", "28"], answer: "26" },
+                { question: "If a clock shows 9:45 and is advanced by 30 minutes, what is the new time?", options: ["10:00", "10:15", "10:30", "11:00"], answer: "10:15" },
+                { question: "A rope is cut into 3 equal parts. If the original length was 21 meters, what is each piece’s length?", options: ["5m", "6m", "7m", "8m"], answer: "7m" },
+                { question: "A bus moves at 50 km/h. How far does it travel in 4 hours?", options: ["100 km", "150 km", "200 km", "250 km"], answer: "200 km" },
+                { question: "If a book costs $12, how much do 5 books cost?", options: ["$50", "$55", "$60", "$65"], answer: "$60" }
+            ]
+        };
+
+        let timeLeft = 300; // 5 minutes in seconds
+        let timerInterval;
+        let totalQuestions = 0;
+        let currentQuestions = []; // Store the current set of questions
+
+        function loadQuiz() {
+            const quizDiv = document.getElementById("quiz");
+            quizDiv.innerHTML = "";
+            totalQuestions = 0;
+            document.getElementById("progress").style.width = '0%'; // Reset progress bar
+            currentQuestions = getAllQuestions(); // Get all questions
+            currentQuestions = shuffleArray(currentQuestions).slice(0, 20); // Shuffle and take 20 questions
+            displayQuestions(); // Call to display questions
+            document.getElementById("submit-btn").disabled = true; // Reset submit button
+            startTimer();
+        }
+
+        function getAllQuestions() {
+            return Object.values(categories).flat();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        function displayQuestions() {
+            const quizDiv = document.getElementById("quiz");
+            quizDiv.innerHTML = ""; // Clear previous questions
+
+            currentQuestions.forEach((q, index) => {
+                const div = document.createElement("div");
+                div.classList.add("question");
+                div.innerHTML = `<p>${q.question}</p>`;
+                
+                const optionsDiv = document.createElement("div");
+                optionsDiv.classList.add("options");
+                
+                q.options.forEach(option => {
+                    const label = document.createElement("label");
+                    const input = document.createElement("input");
+                    input.type = "radio";
+                    input.name = `question-${index}`; // Use index for unique names
+                    input.value = option;
+
+                    // Add event listener to check if all questions are answered
+                    input.addEventListener('change', checkAllAnswered);
+
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(option));
+                    optionsDiv.appendChild(label);
+                });
+                
+                div.appendChild(optionsDiv);
+                quizDiv.appendChild(div);
+            });
+            totalQuestions = currentQuestions.length; // Set total questions
+        }
+
+        function checkAllAnswered() {
+            const allAnswered = document.querySelectorAll('input[type="radio"]:checked').length === totalQuestions;
+            document.getElementById("submit-btn").disabled = !allAnswered;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                } else {
+                    timeLeft--;
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    document.getElementById("time").innerText = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                    document.getElementById("progress").style.width = `${((300 - timeLeft) / 300) * 100}%`;
+
+                    // Warning for 1 minute left
+                    if (timeLeft === 60) {
+                        alert("1 minute left!");
+                    }
+                }
+            }, 1000);
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            let correctAnswers = 0;
+
+            // Iterate through each question
+            currentQuestions.forEach((question, index) => {
+                const selectedOption = document.querySelector(`input[name="question-${index}"]:checked`);
+                const questionBlock = document.querySelector(`.question:nth-child(${index + 1})`); // Get the question block
+
+                if (selectedOption) {
+                    const correctAnswer = question.answer; // Ensure this matches the correct question
+                    if (selectedOption.value === correctAnswer) {
+                        correctAnswers++;
+                        questionBlock.classList.add("correct-answer"); // Highlight correct answer
+                    } else {
+                        questionBlock.classList.add("wrong-answer"); // Highlight wrong answer
+                    }
+                }
+            });
+
+            const iqScore = calculateIQ(correctAnswers);
+            displayResults(iqScore, correctAnswers);
+        }
+
+        function calculateIQ(score) {
+            const maxScore = totalQuestions; // Total number of questions
+            const iq = Math.min((score / maxScore) * 130, 130); // Cap IQ score at 130
+            return Math.round(iq);
+        }
+
+        function displayResults(iqScore, correctAnswers) {
+            document.getElementById("iq-score").innerText = iqScore;
+            document.getElementById("correct-answers").innerText = correctAnswers;
+            document.getElementById("incorrect-answers").innerText = totalQuestions - correctAnswers;
+
+            document.getElementById("result").classList.remove("hidden");
+
+            // Confetti animation
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function saveResults() {
+            const resultText = `IQ Score: ${document.getElementById("iq-score").innerText}\n` +
+                `Correct Answers: ${document.getElementById("correct-answers").innerText}\n` +
+                `Incorrect Answers: ${document.getElementById("incorrect-answers").innerText}`;
+
+            const blob = new Blob([resultText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "IQ_Test_Results.txt";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function restartQuiz() {
+            timeLeft = 300;
+            document.getElementById("result").classList.add("hidden");
+            loadQuiz();
+        }
+
+        loadQuiz();
+    </script>
+</body>
+</html>

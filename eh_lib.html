@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethical Hacking Quiz</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #87CEEB, #ADD8E6);
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            margin: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            text-align: center;
+            color: #1E90FF;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            height: 15px;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #1E90FF, #87CEEB);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .question:hover {
+            transform: translateY(-5px);
+        }
+
+        .question p {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #444;
+        }
+
+        .options label {
+            display: block;
+            margin: 10px 0;
+            padding: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .options label:hover {
+            background: #f1f1f1;
+            border-color: #1E90FF;
+        }
+
+        .options input[type="radio"]:checked + label {
+            background: #1E90FF;
+            color: white;
+            border-color: #1E90FF;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #1E90FF, #87CEEB);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(30, 144, 255, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .result h2 {
+            color: #1E90FF;
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        .result p {
+            margin: 10px 0;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        .correct {
+            color: #2ecc71;
+        }
+
+        .incorrect {
+            color: #e74c3c;
+        }
+
+        .correct-answer {
+            background-color: #d4edda; /* Light green background */
+            border: 2px solid #c3e6cb; /* Green border */
+        }
+
+        .incorrect-answer {
+            background-color: #f8d7da; /* Light red background */
+            border: 2px solid #f5c6cb; /* Red border */
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .timer {
+                font-size: 1.2em;
+            }
+
+            .question {
+                padding: 15px;
+            }
+
+            .options label {
+                padding: 10px;
+            }
+
+            button {
+                padding: 12px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Ethical Hacking Quiz</h1>
+        <div class="timer">Time Left: <span id="time">05:00</span></div>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div id="quiz"></div>
+        <button id="submit-btn" onclick="submitQuiz()" disabled>Submit</button>
+        <div id="result" class="hidden result">
+            <h2>Your Results 🎉</h2>
+            <p>Correct Answers: <span id="correct-answers" class="correct"></span> ✅</p>
+            <p>Incorrect Answers: <span id="incorrect-answers" class="incorrect"></span> ❌</p>
+            <button onclick="restartQuiz()">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const categories = {
+            "Ethical Hacking": [
+                { question: "What does the term 'ethical hacking' refer to?", options: ["A) Hacking for personal gain", "B) Hacking with the permission of the owner to identify vulnerabilities", "C) Hacking to disrupt services", "D) Hacking to steal confidential data"], answer: "B) Hacking with the permission of the owner to identify vulnerabilities" },
+                { question: "What is the primary goal of ethical hacking?", options: ["A) To damage the target system", "B) To exploit vulnerabilities for malicious purposes", "C) To identify and fix vulnerabilities", "D) To steal data"], answer: "C) To identify and fix vulnerabilities" },
+                { question: "What tool is commonly used for network scanning in ethical hacking?", options: ["A) Nmap", "B) WordPress", "C) Notepad", "D) Photoshop"], answer: "A) Nmap" },
+                { question: "Which of the following is a popular password cracking tool?", options: ["A) Kali Linux", "B) Metasploit", "C) John the Ripper", "D) Wireshark"], answer: "C) John the Ripper" },
+                { question: "What does the term 'penetration testing' mean?", options: ["A) Testing the strength of passwords", "B) Evaluating a system's security by simulating an attack", "C) Scanning for malware", "D) Installing firewalls"], answer: "B) Evaluating a system's security by simulating an attack" },
+                { question: "What is the first phase in ethical hacking?", options: ["A) Post-exploitation", "B) Reconnaissance", "C) Scanning", "D) Reporting"], answer: "B) Reconnaissance" },
+                { question: "Which of the following is a commonly used tool for web application security testing?", options: ["A) Metasploit", "B) Burp Suite", "C) Wireshark", "D) John the Ripper"], answer: "B) Burp Suite" },
+                { question: "Which of these is a method for gaining unauthorized access to a system?", options: ["A) Social engineering", "B) Exploit development", "C) Phishing", "D) All of the above"], answer: "D) All of the above" },
+                { question: "What is the 'White Hat' hacker?", options: ["A) A hacker who uses their skills for illegal activities", "B) A hacker who works to improve security with permission", "C) A hacker who uses exploits for personal gain", "D) A hacker who hides malicious code in software"], answer: "B) A hacker who works to improve security with permission" },
+                { question: "What is the purpose of a 'Backdoor' in a system?", options: ["A) To secure the system", "B) To allow unauthorized access to the system later", "C) To fix system vulnerabilities", "D) To monitor network traffic"], answer: "B) To allow unauthorized access to the system later" },
+                { question: "What does the term 'footprinting' in ethical hacking?", options: ["A) Creating backdoors", "B) Gathering information about a system or network", "C) Writing exploit codes", "D) Encrypting data"], answer: "B) Gathering information about a system or network" },
+                { question: "Which protocol is used for secure communication over the Internet?", options: ["A) HTTP", "B) HTTPS", "C) FTP", "D) SMTP"], answer: "B) HTTPS" },
+                { question: "Which tool can be used for vulnerability scanning of systems and applications?", options: ["A) Nessus", "B) Nmap", "C) Wireshark", "D) Netcat"], answer: "A) Nessus" },
+                { question: "Which type of attack involves intercepting and altering communication between two parties?", options: ["A) Man-in-the-Middle (MitM)", "B) Denial of Service (DoS)", "C) Cross-Site Scripting (XSS)", "D) SQL Injection"], answer: "A) Man-in-the-Middle (MitM)" },
+                { question: "What is the purpose of a 'Rootkit' in a system?", options: ["A) To enhance system performance", "B) To hide the presence of malicious software", "C) To prevent viruses from infecting the system", "D) To monitor network traffic"], answer: "B) To hide the presence of malicious software" },
+                { question: "What does the term 'black hat hacker' refer to?", options: ["A) A hacker who uses their skills for unethical or illegal purposes", "B) A hacker who works to improve security systems", "C) A hacker who develops software", "D) A hacker who works for the government"], answer: "A) A hacker who uses their skills for unethical or illegal purposes" },
+                { question: "What does 'DDoS' stand for?", options: ["A) Direct Denial of Service", "B) Distributed Denial of Service", "C) Denial of Security", "D) Distributed Security of Service"], answer: "B) Distributed Denial of Service" },
+                { question: "Which of the following is used to gain elevated access privileges in a system?", options: ["A) Phishing", "B) Privilege Escalation", "C) Session Hijacking", "D) SQL Injection"], answer: "B) Privilege Escalation" },
+                { question: "What is the 'TCP/IP' protocol suite primarily used for?", options: ["A) Protecting networks", "B) Managing file systems", "C) Enabling communication over the internet", "D) Hiding network traffic"], answer: "C) Enabling communication over the internet" },
+                { question: "Which of the following is a common attack vector in web application security?", options: ["A) SQL Injection", "B) Cross-Site Scripting (XSS)", "C) Cross-Site Request Forgery (CSRF)", "D) All of the above"], answer: "D) All of the above" },
+                { question: "Which tool is commonly used to perform a wireless network penetration test?", options: ["A) Aircrack-ng", "B) Wireshark", "C) Nessus", "D) Nmap"], answer: "A) Aircrack-ng" },
+                { question: "What is the purpose of the 'social engineering' attack?", options: ["A) To exploit network vulnerabilities", "B) To deceive people into revealing sensitive information", "C) To perform DDoS attacks", "D) To crack passwords"], answer: "B) To deceive people into revealing sensitive information" },
+                { question: "Which technique is used to bypass firewall restrictions by making requests look like legitimate traffic?", options: ["A) IP Spoofing", "B) DNS Spoofing", "C) Packet Sniffing", "D) Session Fixation"], answer: "A) IP Spoofing" },
+                { question: "Which is NOT a phase of ethical hacking?", options: ["A) Planning", "B) Scanning", "C) Monitoring", "D) Reporting"], answer: "C) Monitoring" },
+                { question: "What is 'phishing'?", options: ["A) A method to gather credentials through fake websites or emails", "B) A type of DDoS attack", "C) A method of securing data", "D) A method of encrypting sensitive files"], answer: "A) A method to gather credentials through fake websites or emails" },
+                { question: "Which of the following best describes a 'zero-day' vulnerability?", options: ["A) A vulnerability discovered and patched by a vendor", "B) A vulnerability that is publicly disclosed and fixed within one day", "C) A previously unknown vulnerability that is exploited before a fix is available", "D) A vulnerability that occurs after a patch is applied"], answer: "C) A previously unknown vulnerability that is exploited before a fix is available" },
+                { question: "What is the primary function of the 'Metasploit' tool in ethical hacking?", options: ["A) To create and exploit vulnerabilities", "B) To monitor network traffic", "C) To fix system vulnerabilities", "D) To create firewalls"], answer: "A) To create and exploit vulnerabilities" },
+                { question: "Which of the following attacks targets a website by injecting malicious SQL statements?", options: ["A) SQL Injection", "B) Cross-Site Scripting (XSS)", "C) DDoS", "D) Buffer Overflow"], answer: "A) SQL Injection" },
+                { question: "Which is the main purpose of performing 'network sniffing'?", options: ["A) To fix network issues", "B) To monitor and capture network traffic", "C) To prevent DDoS attacks", "D) To manage server load"], answer: "B) To monitor and capture network traffic" },
+                { question: "What is the first step in ethical hacking?", options: ["A) Gaining access", "B) Identifying vulnerabilities", "C) Reconnaissance", "D) Exploiting a vulnerability"], answer: "C) Reconnaissance" },
+                { question: "What does the term 'Social Engineering' refer to?", options: ["A) Using tools to penetrate a network", "B) Manipulating people to gain unauthorized access to systems or information", "C) Hacking into social media accounts", "D) Creating firewalls"], answer: "B) Manipulating people to gain unauthorized access to systems or information" },
+                { question: "What does the term 'Keylogger' refer to in ethical hacking?", options: ["A) A tool used to track network traffic", "B) A software that records keystrokes on a computer", "C) A method for encrypting passwords", "D) A type of vulnerability scanner"], answer: "B) A software that records keystrokes on a computer" },
+                { question: "What is a 'Vulnerability Assessment'?", options: ["A) Testing how strong a network firewall is", "B) Analyzing a system for weaknesses that could be exploited", "C) Investigating unauthorized access", "D) Monitoring data for malicious activity"], answer: "B) Analyzing a system for weaknesses that could be exploited" },
+                { question: "What is 'Port Scanning' used for in ethical hacking?", options: ["A) To monitor the amount of data being transmitted", "B) To find open ports on a target system", "C) To prevent attacks on ports", "D) To encrypt network traffic"], answer: "B) To find open ports on a target system" },
+                { question: "What is 'Denial of Service (DoS)' attack?", options: ["A) An attack that takes over control of a system", "B) An attack that prevents legitimate users from accessing services", "C) An attack that deletes important files", "D) An attack that steals sensitive information"], answer: "B) An attack that prevents legitimate users from accessing services" },
+                { question: "What does the term 'Whaling' refer to in the context of phishing?", options: ["A) Phishing attacks targeting individuals with high-profile positions (e.g., CEOs)", "B) Phishing attacks targeting specific companies", "C) Sending fake emails to random individuals", "D) Phishing attacks targeting only government systems"], answer: "A) Phishing attacks targeting individuals with high-profile positions (e.g., CEOs)" },
+                { question: "Which of the following is a type of social engineering attack?", options: ["A) Phishing", "B) SQL Injection", "C) Malware injection", "D) Cross-Site Scripting (XSS)"], answer: "A) Phishing" },
+                { question: "What is a 'Firewall' used for?", options: ["A) To prevent unauthorized access to or from a network", "B) To monitor network traffic", "C) To crack passwords", "D) To scan for vulnerabilities"], answer: "A) To prevent unauthorized access to or from a network" },
+                { question: "What is 'Spoofing' in the context of network security?", options: ["A) A method for securing email systems", "B) A technique to fake an identity or IP address to deceive systems", "C) An attack to increase system resources", "D) A type of denial of service attack"], answer: "B) A technique to fake an identity or IP address to deceive systems" },
+                { question: "What is the role of the 'Payload' in an exploit?", options: ["A) It carries out the attack or exploit after the vulnerability is triggered", "B) It prevents detection by antivirus software", "C) It scans for vulnerabilities in the system", "D) It encrypts stolen data"], answer: "A) It carries out the attack or exploit after the vulnerability is triggered" },
+                { question: "What is the purpose of 'Vishing' in social engineering?", options: ["A) To hack into social media accounts", "B) To deceive individuals over the phone into providing sensitive information", "C) To create fake websites", "D) To infect systems with malware"], answer: "B) To deceive individuals over the phone into providing sensitive information" },
+                { question: "What does the term 'Buffer Overflow' refer to in the context of ethical hacking?", options: ["A) A flaw in the system memory that allows code to be executed without permission", "B) A type of malware that damages files", "C) A method of encrypting sensitive data", "D) An attack that floods a server with too much data"], answer: "A) A flaw in the system memory that allows code to be executed without permission" },
+                { question: "What is the primary function of the 'Netcat' tool in ethical hacking?", options: ["A) To sniff network packets", "B) To test network connectivity and transfer files", "C) To perform DNS lookups", "D) To analyze SQL vulnerabilities"], answer: "B) To test network connectivity and transfer files" },
+                { question: "Which of the following attacks involves the unauthorized inclusion of malicious code into a website?", options: ["A) Cross-Site Scripting (XSS)", "B) SQL Injection", "C) DDoS", "D) Buffer Overflow"], answer: "A) Cross-Site Scripting (XSS)" },
+                { question: "What is the role of 'Nessus' in vulnerability assessments?", options: ["A) It performs network analysis and monitoring", "B) It identifies and scans for vulnerabilities within systems", "C) It performs penetration testing", "D) It cracks passwords"], answer: "B) It identifies and scans for vulnerabilities within systems" },
+                { question: "What type of attack occurs when an attacker listens in on unencrypted data traffic to steal sensitive information?", options: ["A) Packet Sniffing", "B) Phishing", "C) DDoS", "D) SQL Injection"], answer: "A) Packet Sniffing" },
+                { question: "Which of the following is a risk of using public Wi-Fi without security measures in place?", options: ["A) Increased system performance", "B) Exposure to Man-in-the-Middle (MitM) attacks", "C) Prevention of malware attacks", "D) Faster data transfer speeds"], answer: "B) Exposure to Man-in-the-Middle (MitM) attacks" },
+                { question: "What does the 'airgap' security model refer to?", options: ["A) A type of firewall that blocks unauthorized access", "B) A method to keep systems isolated from external networks", "C) A technique to prevent SQL Injection", "D) A vulnerability assessment technique"], answer: "B) A method to keep systems isolated from external networks" },
+                { question: "Which of the following tools can be used to perform vulnerability analysis on a website?", options: ["A) Nikto", "B) Metasploit", "C) Aircrack-ng", "D) Wireshark"], answer: "A) Nikto" },
+                { question: "What is the purpose of the 'Shodan' search engine in ethical hacking?", options: ["A) To scan for open ports on systems", "B) To search for connected devices on the internet", "C) To perform network traffic analysis", "D) To analyze SQL vulnerabilities"], answer: "B) To search for connected devices on the internet" }
+            ]
+        };
+
+        let timeLeft = 300; // 5 minutes in seconds
+        let timerInterval;
+        let totalQuestions = 0;
+        let currentQuestions = []; // Store the current set of questions
+
+        function loadQuiz() {
+            const quizDiv = document.getElementById("quiz");
+            quizDiv.innerHTML = "";
+            totalQuestions = 0;
+            document.getElementById("progress").style.width = '0%'; // Reset progress bar
+            currentQuestions = getAllQuestions(); // Get all questions
+            currentQuestions = shuffleArray(currentQuestions).slice(0, 10); // Shuffle and take 10 questions
+            displayQuestions(); // Call to display questions
+            document.getElementById("submit-btn").disabled = true; // Reset submit button
+            startTimer();
+        }
+
+        function getAllQuestions() {
+            return Object.values(categories).flat();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        function displayQuestions() {
+            const quizDiv = document.getElementById("quiz");
+            quizDiv.innerHTML = ""; // Clear previous questions
+
+            currentQuestions.forEach((q, index) => {
+                const div = document.createElement("div");
+                div.classList.add("question");
+                div.innerHTML = `<p>${q.question}</p>`;
+                
+                const optionsDiv = document.createElement("div");
+                optionsDiv.classList.add("options");
+                
+                q.options.forEach(option => {
+                    const label = document.createElement("label");
+                    const input = document.createElement("input");
+                    input.type = "radio";
+                    input.name = `question-${index}`; // Use index for unique names
+                    input.value = option;
+
+                    // Add event listener to check if all questions are answered
+                    input.addEventListener('change', checkAllAnswered);
+
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(option));
+                    optionsDiv.appendChild(label);
+                });
+                
+                div.appendChild(optionsDiv);
+                quizDiv.appendChild(div);
+            });
+            totalQuestions = currentQuestions.length; // Set total questions
+        }
+
+        function checkAllAnswered() {
+            const allAnswered = document.querySelectorAll('input[type="radio"]:checked').length === totalQuestions;
+            document.getElementById("submit-btn").disabled = !allAnswered;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                } else {
+                    timeLeft--;
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    document.getElementById("time").innerText = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                    document.getElementById("progress").style.width = `${((300 - timeLeft) / 300) * 100}%`;
+
+                    // Warning for 1 minute left
+                    if (timeLeft === 60) {
+                        alert("1 minute left!");
+                    }
+                }
+            }, 1000);
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            let correctAnswers = 0;
+
+            // Iterate through each question
+            currentQuestions.forEach((question, index) => {
+                const selectedOption = document.querySelector(`input[name="question-${index}"]:checked`);
+                if (selectedOption) {
+                    const correctAnswer = question.answer; // Ensure this matches the correct question
+                    if (selectedOption.value === correctAnswer) {
+                        correctAnswers++;
+                    }
+                }
+            });
+
+            displayResults(correctAnswers);
+        }
+
+        function displayResults(correctAnswers) {
+            document.getElementById("correct-answers").innerText = correctAnswers;
+            document.getElementById("incorrect-answers").innerText = totalQuestions - correctAnswers;
+
+            // Highlight the questions based on correctness
+            currentQuestions.forEach((question, index) => {
+                const selectedOption = document.querySelector(`input[name="question-${index}"]:checked`);
+                const questionBlock = document.querySelectorAll('.question')[index]; // Get the question block
+
+                if (selectedOption) {
+                    const correctAnswer = question.answer; // Get the correct answer
+                    if (selectedOption.value === correctAnswer) {
+                        questionBlock.classList.add('correct-answer'); // Highlight correct answer
+                    } else {
+                        questionBlock.classList.add('incorrect-answer'); // Highlight incorrect answer
+                    }
+                } else {
+                    questionBlock.classList.add('incorrect-answer'); // If no answer was selected, mark as incorrect
+                }
+            });
+
+            document.getElementById("result").classList.remove("hidden");
+        }
+
+        function restartQuiz() {
+            timeLeft = 300;
+            document.getElementById("result").classList.add("hidden");
+            loadQuiz();
+        }
+
+        loadQuiz();
+    </script>
+</body>
+</html>

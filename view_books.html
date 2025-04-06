@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Books</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.5)), url("{{ url_for('static', filename='book.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Header Styling */
+        header {
+            background: #1f2a44;
+            color: white;
+            padding: 20px 40px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        header img {
+            height: 60px;
+            margin-right: 20px;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+            flex-grow: 1;
+            letter-spacing: 1.5px;
+            color: #e0e0e0;
+        }
+
+        /* Back Button Styling */
+        .back-button {
+            margin: 0;
+        }
+
+        .back-btn {
+            padding: 12px 20px;
+            border: 1px solid #a3bffa;
+            background: linear-gradient(135deg, #4a6fa5, #3d5a80);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, #3d5a80, #4a6fa5);
+            border-color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Books Container */
+        .books-container {
+            max-width: 1000px;
+            margin: 80px auto;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            margin-bottom: 40px;
+            color: #f5f5f5;
+            font-size: 34px;
+            font-weight: 600;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+            border-bottom: 2px solid #f5f5f5;
+            padding-bottom: 10px;
+        }
+
+        /* Search Bar Styling */
+        .search-form {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .search-input {
+            padding: 15px 25px;
+            width: 70%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            background: #fff;
+            border-color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .search-button {
+            padding: 15px 30px;
+            border: 1px solid #fff;
+            background: linear-gradient(135deg, #4a6fa5, #3d5a80);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-button:hover {
+            background: linear-gradient(135deg, #3d5a80, #4a6fa5);
+            border-color: #a3bffa;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Books Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-bottom: 40px;
+        }
+
+        th, td {
+            padding: 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        th:last-child, td:last-child {
+            border-right: none;
+        }
+
+        th {
+            background: linear-gradient(135deg, #4a6fa5, #3d5a80);
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 2px solid #fff;
+        }
+
+        tr {
+            transition: background 0.3s ease;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Barcode Styling */
+        .barcode {
+            padding: 5px 10px;
+            border: 1px solid #a3bffa;
+            font-size: 14px;
+            font-weight: 600;
+            background: rgba(163, 191, 250, 0.2);
+            color: #fff;
+            display: inline-block; /* Ensure it displays as a block element */
+            min-width: 50px; /* Minimum width to prevent collapse */
+            text-align: center; /* Center the text */
+        }
+
+        /* Status Styling */
+        .status {
+            padding: 5px 10px;
+            border: 1px solid #fff;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status.available {
+            background: rgba(40, 167, 69, 0.3);
+            border-color: #28a745;
+        }
+
+        .status.borrowed {
+            background: rgba(220, 53, 69, 0.3);
+            border-color: #dc3545;
+        }
+
+        /* No Books Message */
+        p {
+            color: #f5f5f5;
+            font-size: 18px;
+            font-weight: 500;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .books-container {
+                margin: 30px;
+                padding: 30px;
+            }
+            header img {
+                height: 45px;
+            }
+            .header-title {
+                font-size: 24px;
+            }
+            h1 {
+                font-size: 28px;
+            }
+            table, th, td {
+                font-size: 14px;
+                padding: 15px;
+            }
+            .search-form {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            .search-input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .search-button {
+                width: 50%;
+            }
+            .back-btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            .barcode, .status {
+                font-size: 12px;
+                margin-top: 5px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='psgpolytechlogo.jpg') }}" alt="College Logo">
+        <div class="header-title">Available Books</div>
+        <div class="back-button">
+            <button class="back-btn" onclick="history.back()">Back</button>
+        </div>
+    </header>
+    <div class="books-container">
+        <h1>Available Books</h1>
+        <!-- Search Bar -->
+        <form method="POST" action="{{ url_for('view_books') }}" class="search-form">
+            <input type="text" name="search_query" placeholder="Search by title, author, or barcode..." 
+                   value="{{ search_query if search_query else '' }}" class="search-input">
+            <button type="submit" class="search-button">Search</button>
+        </form>
+
+        {% if books %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Barcode</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                        <tr>
+                            <td>{{ book[1] }}</td> <!-- Title -->
+                            <td>{{ book[2] }}</td> <!-- Author -->
+                            <td><span class="barcode">{{ book[3] if book[3] else 'N/A' }}</span></td> <!-- Barcode with fallback -->
+                            <td>
+                                <span class="status {% if book[4] %}available{% else %}borrowed{% endif %}">
+                                    {% if book[4] %}Available{% else %}Borrowed{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No books available{% if search_query %} matching "{{ search_query }}"{% endif %}.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

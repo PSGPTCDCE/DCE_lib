@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Poppins', sans-serif; /* Still using Poppins for elegance */
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.5)), url("{{ url_for('static', filename='book.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Header Styling */
+        header {
+            background: #1f2a44; /* Deep navy for a classy look */
+            color: white;
+            padding: 15px 30px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header img {
+            height: 50px; /* Normal rectangular logo */
+        }
+
+        .header-title {
+            font-size: 26px;
+            font-weight: 600;
+            text-align: center;
+            flex-grow: 1;
+            letter-spacing: 1px;
+            color: #e0e0e0; /* Soft white for class */
+        }
+
+        .logout-link {
+            font-size: 16px;
+            color: #a3bffa; /* Muted lavender */
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .logout-link:hover {
+            background-color: rgba(163, 191, 250, 0.1);
+            color: #fff;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 950px;
+            margin: 60px auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1); /* Very subtle transparency */
+            backdrop-filter: blur(12px); /* Soft blur for elegance */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            color: #f5f5f5; /* Off-white for sophistication */
+            font-size: 32px;
+            font-weight: 600;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        /* Dashboard Links */
+        .dashboard-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        .dashboard-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: linear-gradient(135deg, #4a6fa5, #3d5a80); /* Muted blue gradient */
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 500;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-links a::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease;
+        }
+
+        .dashboard-links a:hover::before {
+            width: 250px;
+            height: 250px;
+        }
+
+        .dashboard-links a:hover {
+            transform: translateY(-3px); /* Subtle lift */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .dashboard-container {
+                margin: 20px;
+                padding: 25px;
+            }
+            .dashboard-links {
+                grid-template-columns: 1fr;
+            }
+            header img {
+                height: 40px;
+            }
+            .header-title {
+                font-size: 22px;
+            }
+            h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"> <!-- Poppins font -->
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='psgpolytechlogo.jpg') }}" alt="PSG PolyTech Logo">
+        <div class="header-title">PSG PTC</div>
+        <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+    </header>
+    <div class="dashboard-container">
+        <h1>Dashboard</h1>
+        <div class="dashboard-links">
+            <a href="{{ url_for('add_book') }}">Add Book</a>
+            <a href="{{ url_for('view_books') }}">View Books</a>
+            <a href="{{ url_for('borrow_book') }}">Borrow Book</a>
+            <a href="{{ url_for('return_book') }}">Return Book</a>
+            <a href="{{ url_for('borrowed_books') }}">View Borrowed Books</a>
+        </div>
+    </div>
+</body>
+</html>

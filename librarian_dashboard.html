@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Borrowed Books - Librarian Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Poppins', sans-serif; /* Use Poppins font */
+            margin: 0;
+            padding: 0;
+            /* Apply background gradient and image (replace with your actual image path) */
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.5)), url("{{ url_for('static', filename='book.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            color: #fff; /* Default text color for dark background */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        /* Header Styling */
+        header {
+            background: #1f2a44; /* Deep navy header */
+            color: white;
+            padding: 15px 30px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+            position: sticky; /* Make header sticky */
+            top: 0;
+            z-index: 10;
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+
+        /* Optional: Add logo style if needed */
+        header img {
+            height: 50px; /* Adjust as needed */
+        }
+
+        .header-title {
+            font-size: 24px; /* Slightly smaller title */
+            font-weight: 600;
+            text-align: center;
+            flex-grow: 1; /* Allow title to take available space */
+            margin: 0 20px; /* Add some margin around the title */
+            color: #e0e0e0; /* Soft white */
+        }
+
+        .logout-link {
+            font-size: 16px;
+            color: #a3bffa; /* Muted lavender */
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            white-space: nowrap; /* Prevent logout text wrapping */
+        }
+
+        .logout-link:hover {
+            background-color: rgba(163, 191, 250, 0.1);
+            color: #fff;
+        }
+
+        /* Main Content Container */
+        .content-container {
+            width: 90%; /* Adjust width as needed */
+            max-width: 1200px; /* Maximum width */
+            margin: 40px auto; /* Center container with margin */
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1); /* Subtle transparency */
+            backdrop-filter: blur(10px); /* Blur effect */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            color: #f5f5f5; /* Off-white */
+            font-size: 28px;
+            font-weight: 600;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        /* Flash Messages Styling */
+        .flash-messages {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+        .flash-messages p {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        /* Style different flash categories */
+        .flash-messages .error {
+            background-color: rgba(255, 100, 100, 0.2); /* Light red background */
+            color: #ffdddd; /* Light red text */
+            border: 1px solid rgba(255, 100, 100, 0.4);
+        }
+        .flash-messages .success {
+            background-color: rgba(100, 255, 100, 0.2); /* Light green background */
+            color: #ddffdd; /* Light green text */
+            border: 1px solid rgba(100, 255, 100, 0.4);
+        }
+        .flash-messages .warning {
+            background-color: rgba(255, 180, 80, 0.2); /* Light orange background */
+            color: #fff0dd; /* Light orange text */
+            border: 1px solid rgba(255, 180, 80, 0.4);
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Use collapse for cleaner lines */
+            margin-top: 20px;
+            background-color: rgba(0, 0, 0, 0.2); /* Slightly transparent black background */
+            border-radius: 8px; /* Rounded corners for the table */
+            overflow: hidden; /* Ensure corners are clipped */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        th, td {
+            padding: 12px 15px; /* More padding */
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Lighter border */
+            color: #e0e0e0; /* Light text color for readability */
+        }
+
+        th {
+            background-color: rgba(74, 111, 165, 0.5); /* Header background - semi-transparent muted blue */
+            color: #fff; /* White header text */
+            font-weight: 600; /* Bold headers */
+            text-transform: uppercase; /* Uppercase headers */
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        tr {
+            transition: background-color 0.3s ease; /* Smooth hover transition */
+        }
+
+        tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.1); /* Subtle hover effect */
+        }
+
+        /* Style for overdue books */
+        .overdue {
+            background-color: rgba(217, 83, 79, 0.3); /* Semi-transparent red for overdue */
+            color: #f8d7da; /* Lighter red text for contrast */
+            font-weight: 500; /* Slightly bolder */
+        }
+        .overdue td {
+             color: #f8d7da; /* Ensure text color overrides default */
+        }
+         .overdue:hover {
+            background-color: rgba(217, 83, 79, 0.45); /* Darker red on hover */
+        }
+
+
+        /* No books message */
+        .no-books-message {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 18px;
+            color: #ccc;
+        }
+
+        /* Button/Navigation Link Styling */
+        .navigation-links {
+            margin-top: 30px;
+            text-align: center; /* Center the buttons */
+            display: flex;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+            justify-content: center; /* Center buttons horizontally */
+            gap: 15px; /* Space between buttons */
+        }
+
+        .button {
+            display: inline-block; /* Changed from flex for simpler centering */
+            padding: 12px 25px; /* Adjusted padding */
+            background: linear-gradient(135deg, #4a6fa5, #3d5a80); /* Muted blue gradient */
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px; /* Slightly less rounded */
+            font-size: 16px; /* Adjusted font size */
+            font-weight: 500;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: none; /* Remove default border */
+            cursor: pointer;
+        }
+
+        .button::before { /* Hover effect from target style */
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease;
+            z-index: 0;
+        }
+         .button span { /* Ensure text is above the effect */
+            position: relative;
+            z-index: 1;
+        }
+
+
+        .button:hover::before {
+            width: 250px; /* Adjust size as needed */
+            height: 250px;
+        }
+
+        .button:hover {
+            transform: translateY(-3px); /* Subtle lift */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 20px;
+            }
+            header {
+                padding: 10px 15px;
+            }
+            .content-container {
+                width: 95%;
+                margin: 20px auto;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            th, td {
+                padding: 10px 8px;
+                font-size: 14px; /* Smaller font size for table on mobile */
+            }
+            .button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            /* Stack buttons vertically if needed */
+            .navigation-links {
+                 flex-direction: column;
+                 align-items: center;
+            }
+             .button {
+                 width: 80%; /* Make buttons take more width */
+                 max-width: 300px;
+             }
+        }
+         @media (max-width: 480px) {
+             header img {
+                 height: 40px;
+             }
+             .header-title {
+                 font-size: 18px;
+                 margin: 0 10px;
+             }
+             .logout-link {
+                 font-size: 14px;
+                 padding: 8px 10px;
+             }
+             th, td {
+                /* Consider hiding less important columns on very small screens */
+                font-size: 13px;
+             }
+         }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">Librarian Dashboard</div> <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+    </header>
+
+    <div class="content-container">
+        <h1>All Borrowed Books</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <p class="{{ category }}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% if borrowed_books %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Borrow Date</th>
+                        <th>Due Date</th>
+                        <th>Borrowed By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in borrowed_books %}
+                        <tr {% if book[3] < current_date %}class="overdue"{% endif %}>
+                            <td>{{ book[0] }}</td> <td>{{ book[1] }}</td> <td>{{ book[2] }}</td> <td>{{ book[3] }}</td> <td>{{ book[4] }}</td> </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-books-message">No books are currently borrowed.</p>
+        {% endif %}
+
+        <div class="navigation-links">
+            <a href="{{ url_for('add_book') }}" class="button"><span>Add New Book</span></a>
+            <a href="{{ url_for('view_books') }}" class="button"><span>View Available Books</span></a>
+            <a href="{{ url_for('dashboard') }}" class="button"><span>Dashboard Home</span></a>
+        </div>
+    </div>
+
+</body>
+</html>

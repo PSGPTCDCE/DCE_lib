@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        /* General Styling */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.5)), url("{{ url_for('static', filename='book.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Header Section */
+        .header {
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+            background: #1f2a44;
+            color: #e0e0e0;
+            font-size: 24px;
+            font-weight: 600;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Form Container */
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            padding: 30px; /* Increased padding for better spacing */
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 0.6s ease-in-out;
+            margin-top: 80px; /* Adjusted for header spacing */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Logo Styling */
+        img {
+            max-width: 100px;
+            margin: 0 auto 15px; /* Centered with bottom margin */
+            display: block;
+        }
+
+        h1 {
+            color: #f5f5f5;
+            margin-bottom: 20px; /* Consistent spacing */
+            font-size: 26px;
+            font-weight: 600;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Flash Messages */
+        .error, .success {
+            padding: 8px 12px;
+            margin: 10px 0; /* Consistent margin */
+            font-size: 14px;
+            border-radius: 5px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.15);
+        }
+        .success {
+            color: #95e1d3;
+            background: rgba(149, 225, 211, 0.15);
+        }
+
+        /* Form Styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Increased gap for better spacing */
+        }
+
+        label {
+            text-align: left;
+            color: #e0e0e0;
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 5px; /* Added for spacing between label and input */
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="text"] {
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            transition: all 0.3s ease;
+            width: 100%; /* Ensure full width */
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="text"]:focus {
+            border-color: #4a6fa5;
+            background: rgba(255, 255, 255, 0.25);
+            outline: none;
+            box-shadow: 0 0 5px rgba(74, 111, 165, 0.5);
+        }
+
+        input::placeholder {
+            color: #b0b0b0;
+        }
+
+        /* Password Container */
+        .password-container {
+            position: relative;
+            width: 100%; /* Full width for alignment */
+        }
+
+        .password-container input[type="password"],
+        .password-container input[type="text"] {
+            padding-right: 40px; /* Space for the toggle icon */
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%; /* Center vertically */
+            transform: translateY(-50%); /* Precise centering */
+            width: 20px;
+            height: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .toggle-password:hover {
+            opacity: 1;
+        }
+
+        /* Eye Icon Styling */
+        .eye {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 10px;
+            background: transparent;
+            border: 2px solid #fff;
+            border-radius: 50%;
+        }
+
+        .eye::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .eye.closed::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -2px;
+            width: 24px;
+            height: 2px;
+            background: #fff;
+            transform: translateY(-50%) rotate(45deg);
+        }
+
+        select {
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            cursor: pointer;
+            width: 100%; /* Full width */
+            box-sizing: border-box;
+        }
+
+        select:focus {
+            border-color: #4a6fa5;
+            background: rgba(255, 255, 255, 0.25);
+            outline: none;
+            box-shadow: 0 0 5px rgba(74, 111, 165, 0.5);
+        }
+
+        select option {
+            color: #333;
+            background: #fff;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #4a6fa5, #3d5a80);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            width: 100%; /* Full width for alignment */
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #3d5a80, #4a6fa5);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Links */
+        a {
+            color: #a3bffa;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        /* Credits Styling */
+        .credits {
+            position: absolute;
+            bottom: 15px; /* Adjusted for better spacing */
+            right: 15px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            text-align: right;
+            line-height: 1.5; /* Slightly increased for readability */
+        }
+
+        /* Responsive Design */
+        @media (max-width: 500px) {
+            .login-container {
+                padding: 20px;
+                max-width: 320px;
+                margin-top: 70px;
+            }
+            img {
+                max-width: 80px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .header {
+                font-size: 20px;
+                padding: 15px 0;
+            }
+            input[type="text"],
+            input[type="password"],
+            input[type="text"],
+            select,
+            button {
+                font-size: 14px;
+                padding: 8px 10px;
+            }
+            .credits {
+                font-size: 10px;
+                right: 10px;
+                bottom: 10px;
+            }
+            .toggle-password {
+                width: 18px;
+                height: 18px;
+            }
+            .eye {
+                width: 18px;
+                height: 9px;
+            }
+            .eye::before {
+                width: 5px;
+                height: 5px;
+            }
+            .eye.closed::after {
+                width: 20px;
+                height: 1.5px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .login-container {
+                max-width: 280px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="header">COMPUTER ENGINEERING DEPARTMENT Library</div>
+    <div class="login-container">
+        <img src="{{ url_for('static', filename='psgpolytechlogo.jpg') }}" alt="PSG PolyTech Logo">
+        <h1>Login</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method="POST" action="{{ url_for('login') }}">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            <label for="password">Password:</label>
+            <div class="password-container">
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <button type="button" class="toggle-password" onclick="togglePassword()">
+                    <span class="eye"></span>
+                </button>
+            </div>
+            <label for="user_type">Login as:</label>
+            <select id="user_type" name="user_type" required>
+                <option value="" disabled selected>Select your role</option>
+                <option value="librarian">Librarian</option>
+                <option value="member">Member</option>
+            </select>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+    </div>
+    <div class="credits">
+        Created by:<br>
+        Lakshith.S(23DX23)<br>
+        Abhijay.S(23DX04)<br>
+        Ajay Karthic(23DX05)<br>
+        Rudrakshan.M(24DX39)<br>
+        © 2025
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.querySelector('.eye');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.add('closed');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('closed');
+            }
+        }
+    </script>
+</body>
+</html>

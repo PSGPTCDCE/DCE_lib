@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borrowed Books</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.5)), url("{{ url_for('static', filename='book.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Header Styling */
+        header {
+            background: #1f2a44;
+            color: white;
+            padding: 15px 30px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header img {
+            height: 50px;
+        }
+
+        .header-title {
+            font-size: 26px;
+            font-weight: 600;
+            text-align: center;
+            flex-grow: 1;
+            letter-spacing: 1px;
+            color: #e0e0e0;
+        }
+
+        /* Back Button Styling */
+        .back-button {
+            margin: 0;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #4a6fa5, #3d5a80);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, #3d5a80, #4a6fa5);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Borrowed Books Container */
+        .borrowed-books-container {
+            max-width: 950px;
+            margin: 60px auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            color: #f5f5f5;
+            font-size: 32px;
+            font-weight: 600;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        /* Books List Styling */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            display: grid;
+            gap: 15px;
+        }
+
+        li {
+            background: linear-gradient(135deg, #4a6fa5, #3d5a80);
+            padding: 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease;
+        }
+
+        li:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        li:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Due Date Styling */
+        .due-date {
+            font-size: 14px;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 15px;
+            background-color: rgba(255, 193, 7, 0.8); /* Yellow for due date */
+            color: #fff;
+        }
+
+        /* Borrower Styling */
+        .borrower {
+            font-size: 14px;
+            font-weight: 500;
+            color: #e0e0e0;
+            margin-left: 10px;
+        }
+
+        /* No Books Message */
+        p {
+            color: #f5f5f5;
+            font-size: 18px;
+            font-weight: 500;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .borrowed-books-container {
+                margin: 20px;
+                padding: 25px;
+            }
+            header img {
+                height: 40px;
+            }
+            .header-title {
+                font-size: 22px;
+            }
+            h1 {
+                font-size: 26px;
+            }
+            li {
+                font-size: 16px;
+                padding: 15px;
+                flex-direction: column;
+                text-align: center;
+            }
+            .due-date {
+                margin-top: 10px;
+            }
+            .borrower {
+                margin-top: 5px;
+                margin-left: 0;
+            }
+            .back-btn {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='psgpolytechlogo.jpg') }}" alt="College Logo">
+        <div class="header-title">Borrowed Books</div>
+        <!-- Back Button -->
+        <div class="back-button">
+            <button class="back-btn" onclick="history.back()">Back</button>
+        </div>
+    </header>
+    <div class="borrowed-books-container">
+        {% if borrowed_books %}
+            <ul>
+                {% for book in borrowed_books %}
+                    <li>
+                        {{ book[0] }} by {{ book[1] }} <span class="borrower">Borrowed by: {{ book[4] }}</span>
+                        <span class="due-date">Due: {{ book[3] }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No books borrowed.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

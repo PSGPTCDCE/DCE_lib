@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Hardware Quiz</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #87CEEB, #ADD8E6);
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            margin: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            text-align: center;
+            color: #1E90FF;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            height: 15px;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #1E90FF, #87CEEB);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .question:hover {
+            transform: translateY(-5px);
+        }
+
+        .question p {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #444;
+        }
+
+        .options label {
+            display: block;
+            margin: 10px 0;
+            padding: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .options label:hover {
+            background: #f1f1f1;
+            border-color: #1E90FF;
+        }
+
+        .options input[type="radio"]:checked + label {
+            background: #1E90FF;
+            color: white;
+            border-color: #1E90FF;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #1E90FF, #87CEEB);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(30, 144, 255, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+ background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .result h2 {
+            color: #1E90FF;
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        .result p {
+            margin: 10px 0;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+.correct-answer {
+    background-color: #e6f4ea; /* Light green background */
+    border: 2px solid #2ecc71; /* Green border */
+}
+
+.incorrect-answer {
+    background-color: #fde8e8; /* Light red background */
+    border: 2px solid #e74c3c; /* Red border */
+}
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .timer {
+                font-size: 1.2em;
+            }
+
+            .question {
+                padding: 15px;
+            }
+
+            .options label {
+                padding: 10px;
+            }
+
+            button {
+                padding: 12px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>PC Hardware Quiz</h1>
+        <div class="timer">Time Left: <span id="time">05:00</span></div>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div id="quiz"></div>
+        <button id="submit-btn" onclick="submitQuiz()" disabled>Submit</button>
+        <div id="result" class="hidden result">
+            <h2>Your Results 🎉</h2>
+            <p>Correct Answers: <span id="correct-answers" class="correct"></span> ✅</p>
+            <p>Incorrect Answers: <span id="incorrect-answers" class="incorrect"></span> ❌</p>
+            <button onclick="restartQuiz()">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const categories = {
+            "PC Hardware": [
+                { question: "Which component is considered the 'brain' of the computer?", options: ["A) RAM", "B) CPU", "C) Hard Drive", "D) Motherboard"], answer: "B) CPU" },
+                { question: "What is the function of the 'RAM' in a computer?", options: ["A) Stores data permanently", "B) Stores temporary data for quick access", "C) Manages input and output", "D) Controls network connections"], answer: "B) Stores temporary data for quick access" },
+                { question: "Which of the following is an input device?", options: ["A) Monitor", "B) Printer", "C) Mouse", "D) Speaker"], answer: "C) Mouse" },
+                { question: "What does 'BIOS' stand for?", options: ["A) Basic Input Output System", "B) Binary Input Output System", "C) Basic Integrated Operating System", "D) Binary Integrated Operating System"], answer: "A) Basic Input Output System" },
+                { question: "What is the main function of the power supply unit (PSU)?", options: ["A) To cool the CPU", "B) To store data", "C) To convert electrical power to the components of the computer", "D) To manage input and output devices"], answer: "C) To convert electrical power to the components of the computer" },
+                { question: "Which of the following is the most common type of computer storage device?", options: ["A) Optical disk", "B) Flash drive", "C) Hard drive", "D) Memory card"], answer: "C) Hard drive" },
+                { question: "Which of the following is a type of optical storage device?", options: ["A) USB Flash Drive", "B) CD/DVD", "C) Hard Disk", "D) SSD"], answer: "B) CD/DVD" },
+                { question: "What does GPU stand for?", options: ["A) General Processing Unit", "B) Graphics Processing Unit", "C) Global Processing Unit", "D) Graphical Processor Unit"], answer: "B) Graphics Processing Unit" },
+                { question: "Which of the following is responsible for displaying the output on a monitor?", options: ["A) CPU", "B) GPU", "C) RAM", "D) Hard Disk"], answer: "B) GPU" },
+                { question: "What is the role of the motherboard in a computer?", options: ["A) Store data", "B) Connects and allows communication between all computer components", "C) Supply power to the system", "D) Controls the cooling system"], answer: "B) Connects and allows communication between all computer components" },
+                { question: "What type of memory is most commonly used in modern desktop computers for RAM?", options: ["A) DRAM", "B) SRAM", "C) Flash memory", "D) ROM"], answer: "A) DRAM" },
+                { question: "Which of the following is used to store the operating system and software programs?", options: ["A) RAM", "B) ROM", "C) Hard Disk", "D) GPU"], answer: "C) Hard Disk" },
+                { question: "What is the most common type of internal storage used in modern computers?", options: ["A) SSD (Solid State Drive)", "B) HDD (Hard Disk Drive)", "C) Optical Disks", "D) Magnetic Tape"], answer: "A) SSD (Solid State Drive)" },
+                { question: "What is the main purpose of the CPU’s ALU (Arithmetic Logic Unit)?", options: ["A) Perform mathematical calculations and logic operations", "B) Manage input and output operations", "C) Store data temporarily", "D) Connect the CPU to memory"], answer: "A) Perform mathematical calculations and logic operations" },
+                { question: "What does 'DDR' stand for in DDR RAM?", options: ["A) Dual Data Rate", "B) Direct Data Rate", "C) Dual Download Rate", "D) Dynamic Data Rate"], answer: "A) Dual Data Rate" },
+                { question: "Which of the following is NOT a type of expansion slot on the motherboard?", options: ["A) PCI", "B) USB", "C) AGP", "D) SATA"], answer: "D) SATA" },
+                { question: "Which of the following is used to connect a monitor to a computer?", options: ["A) VGA", "B) USB", "C) HDMI", "D) Both A and C"], answer: "D) Both A and C" },
+                { question: "What is the maximum storage capacity of a Blu-ray disc?", options: ["A) 4.7 GB", "B) 25 GB", "C) 50 GB", "D) 100 GB"], answer: "C) 50 GB" },
+                { question: "Which of the following is true about a 'Solid State Drive' (SSD)?", options: ["A) It has mechanical parts like a hard drive", "B) It is faster than a traditional hard drive", "C) It is cheaper than a traditional hard drive", "D) It stores data permanently"], answer: "B) It is faster than a traditional hard drive" },
+                { question: "What is the primary function of the chipset on the motherboard?", options: ["A) Manage CPU tasks", "B) Store data", "C) Manage communication between the CPU, RAM, and other components", "D) Control video output"], answer: "C) Manage communication between the CPU, RAM, and other components" },
+                { question: "What is the purpose of the heat sink in a computer system?", options: ["A) To increase the temperature of the CPU", "B) To cool the CPU by dissipating heat", "C) To store the CPU’s data", "D) To provide electrical power to the CPU"], answer: "B) To cool the CPU by dissipating heat" },
+                { question: "What is a primary feature of 'Liquid Cooling' systems in PCs?", options: ["A) To cool down the GPU only", "B) To prevent overheating of the CPU and GPU", "C) To speed up the computer’s processing capabilities", "D) To manage input and output devices"], answer: "B) To prevent overheating of the CPU and GPU" },
+                { question: "Which of the following storage devices uses NAND flash memory?", options: ["A) Hard Disk Drive (HDD)", "B) Solid State Drive (SSD)", "C) Optical Drive", "D) Floppy Disk"], answer: "B) Solid State Drive (SSD)" },
+                { question: "What is the primary function of the computer’s power supply unit (PSU)?", options: ["A) To store energy for the system", "B) To provide cooling to the components", "C) To convert AC power from the outlet into DC power", "D) To control system performance"], answer: "C) To convert AC power from the outlet into DC power" },
+                { question: "Which of the following is used to store the BIOS configuration settings?", options: ["A) Hard Drive", "B) ROM", "C) RAM", "D) Flash Memory"], answer: "B) ROM" },
+                { question: "What type of connector is used for most modern storage drives (HDD/SSD) in desktop computers?", options: ["A) SATA", "B) IDE", "C) SCSI", "D) PCIe"], answer: "A) SATA" },
+                { question: "Which of the following is a common type of expansion slot used for installing additional components such as graphics cards?", options: ["A) PCIe", "B) SATA", "C) USB", "D) HDMI"], answer: "A) PCIe" },
+                { question: "What is the function of the CMOS battery in a computer?", options: ["A) To store the system's clock settings", "B) To power the CPU", "C) To cool down the system", "D) To store temporary data"], answer: "A) To store the system's clock settings" },
+                { question: "Which of the following describes a 'motherboard form factor'?", options: ["A) The speed of the CPU", "B) The size and layout of the motherboard", "C) The brand of the motherboard", "D) The type of RAM supported"], answer: "B) The size and layout of the motherboard" },
+                { question: "What does 'HDMI' stand for?", options: ["A) High-Definition Multimedia Interface", "B) High-Data Media Interface", "C) High-Definition Managed Interface", "D) High-Density Management Interface"], answer: "A) High-Definition Multimedia Interface" },
+                { question: "What is the main function of a 'GPU' in a computer?", options: ["A) Manage video output and perform graphical processing tasks", "B) Manage networking tasks", "C) Store and retrieve data", "D) Provide audio output"], answer: "A) Manage video output and perform graphical processing tasks" },
+                { question: "What is the role of the 'northbridge' chipset in a motherboard?", options: ["A) Handle communication between the CPU, RAM, and GPU", "B) Manage peripheral devices", "C) Handle network traffic", "D) Store BIOS data"], answer: "A) Handle communication between the CPU, RAM, and GPU" },
+                { question: "What is a common feature of modern 'gaming' PCs?", options: ["A) High-performance GPU for rendering graphics", "B) Low-speed processor", "C) Small form factor", "D) No cooling systems"], answer: "A) High-performance GPU for rendering graphics" },
+                { question: "Which of the following is an example of 'non-volatile' memory?", options: ["A) RAM", "B) CPU cache", "C) ROM", "D) Registers"], answer: "C) ROM" },
+                { question: "What is the most common 'port' used for wired network connections?", options: ["A) USB", "B) HDMI", "C) RJ-45", "D) VGA"], answer: "C) RJ-45" },
+                { question: "Which of the following is a major benefit of using 'DDR4' RAM over 'DDR3' RAM?", options: ["A) DDR4 has higher data transfer speeds and lower power consumption", "B) DDR4 uses more power than DDR3", "C) DDR3 is more reliable", "D) DDR4 is slower than DDR3"], answer: "A) DDR4 has higher data transfer speeds and lower power consumption" },
+                { question: "What is the standard voltage for most desktop computer power supply units (PSUs)?", options: ["A) 5V", "B) 12V", "C) 120V", "D) 220V"], answer: "B) 12V" },
+                { question: "Which of the following is the most common type of optical storage format?", options: ["A) CD", "B) DVD", "C) Blu-ray", "D) USB Flash Drive"], answer: "B) DVD" },
+                { question: "What is the purpose of a 'motherboard chipset'?", options: ["A) To store data", "B) To manage communication between the CPU, RAM, and other components", "C) To power the entire computer system", "D) To display graphics"], answer: "B) To manage communication between the CPU, RAM, and other components" },
+                { question: "Which of the following is true about 'liquid cooling' systems in computers?", options: ["A) They are more expensive and complex but more effective at cooling than air cooling", "B) They are used exclusively for cooling hard drives", "C) They are always more efficient than air cooling systems", "D) They are used only in laptops"], answer: "A) They are more expensive and complex but more effective at cooling than air cooling" },
+                { question: "Which of the following is NOT a type of computer memory?", options: ["A) SRAM", "B) DRAM", "C) GPU", "D) ROM"], answer: "C) GPU" },
+                { question: "Which type of RAM is faster and typically used as cache memory in a CPU?", options: ["A) SRAM", "B) DRAM", "C) VRAM", "D) Flash memory"], answer: "A) SRAM" },
+                { question: "Which of the following is an example of a 'secondary storage' device?", options: ["A) RAM", "B) Hard Disk Drive (HDD)", "C) CPU", "D) SSD Cache"], answer: "B) Hard Disk Drive (HDD)" },
+                { question: "Which of the following types of motherboard connectors are used to attach graphics cards?", options: ["A) PCIe", "B) SATA", "C) IDE", "D) M.2"], answer: "A) PCIe" },
+                { question: "What is the 'front side bus' (FSB) used for in a computer system?", options: ["A) To connect the CPU to other components, like RAM and the motherboard", "B) To connect the hard drive to the motherboard", "C) To power the system", "D) To store data temporarily"], answer: "A) To connect the CPU to other components, like RAM and the motherboard" },
+                { question: "What does 'Wi-Fi' stand for?", options: ["A) Wireless Frequency Interface", "B) Wireless Fidelity", "C) Wide Frequency Internet", "D) Wireless File Integration"], answer: "B) Wireless Fidelity" },
+                { question: "What does 'PCIe' stand for in 'PCIe slots' on a motherboard?", options: ["A) Peripheral Component Interconnect Express", "B) Personal Computer Internal Extension", "C) Processed Component Interface Express", "D) Peripheral Circuitry and Internal Expansion"], answer: "A) Peripheral Component Interconnect Express" },
+                { question: "Which of the following is a type of 'volatile' memory?", options: ["A) ROM", "B) Flash Memory", "C) RAM", "D) Hard Drive"], answer: "C) RAM" },
+                { question: "Which of the following is the most common connection type for connecting modern hard drives to a computer motherboard?", options: ["A) IDE", "B) SATA", "C) PCIe", "D) USB"], answer: "B) SATA" },
+                { question: "What does 'SSD' stand for?", options: ["A) Solid-State Disk", "B) Secure Storage Device", "C) Solid-State Drive", "D) Secure Data Drive"], answer: "C) Solid-State Drive" },
+                { question: "Which of the following is the best description of a 'heat sink'?", options: ["A) A device that stores electrical energy", "B) A component used to dissipate heat generated by the CPU", "C) A device that manages the power supply to the motherboard", "D) A cooling fan used for the RAM"], answer: "B) A component used to dissipate heat generated by the CPU" },
+                { question: "What is the main purpose of an 'expansion card'?", options: ["A) To increase the system’s RAM", "B) To enhance the computer's capabilities by adding new features, such as graphics or sound", "C) To store additional data", "D) To power the CPU"], answer: "B) To enhance the computer's capabilities by adding new features, such as graphics or sound" },
+                { question: "What is the maximum data transfer rate of USB 2.0?", options: ["A) 1 Mbps", "B) 12 Mbps", "C) 480 Mbps", "D) 5 Gbps"], answer: "C) 480 Mbps" },
+                { question: "Which of the following ports is primarily used for video output to a monitor?", options: ["A) VGA", "B) USB", "C) HDMI", "D) RJ-45"], answer: "C) HDMI" },
+                { question: "Which of the following is a characteristic of 'DDR5' RAM over 'DDR4' RAM?", options: ["A) DDR5 offers a higher data transfer rate and improved power efficiency", "B) DDR5 uses more power than DDR4", "C) DDR5 is slower than DDR4", "D) DDR5 is cheaper than DDR4"], answer: "A) DDR5 offers a higher data transfer rate and improved power efficiency" },
+                { question: "What is the standard form factor for most desktop computer cases?", options: ["A) ATX", "B) MicroATX", "C) ITX", "D) Mini-ITX "], answer: "A) ATX" },
+                { question: "What does 'RAID' stand for in RAID configurations?", options: ["A) Redundant Array of Independent Disks", "B) Random Access Integrated Disk", "C) Remote Array of Independent Devices", "D) Redundant Access Interconnected Drives"], answer: "A) Redundant Array of Independent Disks" },
+                { question: "Which type of port is used to connect a monitor to a computer in older systems?", options: ["A) HDMI", "B) VGA", "C) USB", "D) RJ-45"], answer: "B) VGA" },
+                { question: "What type of connector is used for most modern power supplies to connect to the motherboard?", options: ["A) 6-pin PCIe", "B) 24-pin ATX", "C) 8-pin CPU", "D) 12-pin power connector"], answer: "B) 24-pin ATX" },
+                { question: "What is the function of the 'POST' (Power-On Self-Test) process during computer startup?", options: ["A) It checks the connected peripheral devices", "B) It loads the operating system", "C) It checks the integrity of the hardware components like the CPU and RAM", "D) It connects the computer to the internet"], answer: "C) It checks the integrity of the hardware components like the CPU and RAM" },
+                { question: "What is the purpose of a 'BIOS' (Basic Input/Output System)?", options: ["A) To store system files", "B) To manage hardware components and boot up the system", "C) To increase the clock speed of the CPU", "D) To store user data"], answer: "B) To manage hardware components and boot up the system" },
+                { question: "Which type of RAM is used as the main memory in most modern computers?", options: ["A) DRAM", "B) SRAM", "C) VRAM", "D) Flash Memory"], answer: "A) DRAM" },
+                { question: "Which of the following is true about a 'CPU socket' on a motherboard?", options: ["A) It is used to install RAM modules", "B) It is where the hard drive connects to the motherboard", "C) It is where the CPU is installed", "D) It is used for installing a GPU"], answer: "C) It is where the CPU is installed" },
+                { question: "Which of the following is NOT a valid form factor for a power supply unit (PSU)?", options: ["A) ATX", "B) SFX", "C) MicroATX", "D) TFX"], answer: "C) MicroATX" },
+                { question: "What is the main difference between 'SSD' and 'HDD' storage devices?", options: ["A) SSDs are slower but more affordable", "B) SSDs use mechanical parts to store data", "C) SSDs are faster and have no moving parts, unlike HDDs", "D) SSDs have a lower storage capacity compared to HDDs"], answer: "C) SSDs are faster and have no moving parts, unlike HDDs" },
+                { question: "What is the purpose of a 'floppy disk' drive in older computer systems?", options: ["A) To play music", "B) To read and write data to removable disks", "C) To store large data files", "D) To connect external devices to the computer"], answer: "B) To read and write data to removable disks" },
+                { question: "What type of memory is used in graphics cards to store video data?", options: ["A) GDDR", "B) DDR", "C) SRAM", "D) DRAM"], answer: "A) GDDR" },
+                { question: "Which of the following is the primary function of the 'GPU' (Graphics Processing Unit)?", options: ["A) Execute instructions from the operating system", "B) Control network devices", "C) Render images and video for display on the monitor", "D) Provide power to the system"], answer: "C) Render images and video for display on the monitor" },
+                { question: "What is the maximum data transfer rate of USB 3.0?", options: ["A) 12 Mbps", "B) 480 Mbps", "C) 5 Gbps", "D) 10 Gbps"], answer: "C) 5 Gbps" },
+                { question: "What is the standard voltage for most desktop processors?", options: ["A) 1.2V", "B) 1.8V", "C) 3.3V", "D) 5V"], answer: "A) 1.2V" },
+                { question: "What does 'M.2' refer to in modern computer storage?", options: ["A) A type of optical disk drive", "B) A type of memory card used in mobile devices", "C) A connector type for high-speed storage devices like SSDs", "D) A standard for hard drives"], answer: "C) A connector type for high-speed storage devices like SSDs" },
+                { question: "What is the difference between '16-bit' and '32-bit' systems?", options: ["A) 32-bit systems can process more data at once than 16-bit systems", "B) 16-bit systems are faster than 32-bit systems", "C) 32-bit systems are older than 16-bit systems", "D) 16-bit systems support larger amounts of memory than 32-bit systems"], answer: "A) 32-bit systems can process more data at once than 16-bit systems" },
+                { question: "Which type of computer memory is typically used for 'system booting' and 'storing system settings'?", options: ["A) ROM", "B) DRAM", "C) Flash memory", "D) VRAM"], answer: "A) ROM" },
+                { question: "What does 'USB' stand for?", options: ["A) Universal Serial Bus", "B) Unified Storage Base", "C) Universal Storage Bus", "D) Unified System Base"], answer: "A) Universal Serial Bus" },
+                { question: "Which of the following storage devices is known for its durability and speed?", options: ["A) Hard Disk Drive (HDD)", "B) Solid State Drive (SSD)", "C) Floppy Disk", "D) Optical Drive"], answer: "B) Solid State Drive (SSD)" }
+            ]
+        };
+
+        let timeLeft = 300; // 5 minutes in seconds
+        let timerInterval;
+        let totalQuestions = 0;
+        let currentQuestions = []; // Store the current set of questions
+
+        function loadQuiz() {
+            const quizDiv = document.getElementById("quiz");
+            quizDiv.innerHTML = "";
+            totalQuestions = 0;
+            document.getElementById("progress").style.width = '0%'; // Reset progress bar
+            currentQuestions = getAllQuestions(); // Get all questions
+            currentQuestions = shuffleArray(currentQuestions).slice(0, 10); // Shuffle and take 10 questions
+            displayQuestions(); // Call to display questions
+            document.getElementById("submit-btn").disabled = true; // Reset submit button
+            startTimer();
+        }
+
+        function getAllQuestions() {
+            return Object.values(categories).flat();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        function displayQuestions() {
+            const quizDiv = document.getElementById("quiz");
+            quizDiv.innerHTML = ""; // Clear previous questions
+
+            currentQuestions.forEach((q, index) => {
+                const div = document.createElement("div");
+                div.classList.add("question");
+                div.innerHTML = `<p>${q.question}</p>`;
+                
+                const optionsDiv = document.createElement("div");
+                optionsDiv.classList.add("options");
+                
+                q.options.forEach(option => {
+                    const label = document.createElement("label");
+                    const input = document.createElement("input");
+                    input.type = "radio";
+                    input.name = `question-${index}`; // Use index for unique names
+                    input.value = option;
+
+                    // Add event listener to check if all questions are answered
+                    input.addEventListener('change', checkAllAnswered);
+
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(option));
+                    optionsDiv.appendChild(label);
+                });
+                
+                div.appendChild(optionsDiv);
+                quizDiv.appendChild(div);
+            });
+            totalQuestions = currentQuestions.length; // Set total questions
+        }
+
+        function checkAllAnswered() {
+            const allAnswered = document.querySelectorAll('input[type="radio"]:checked').length === totalQuestions;
+            document.getElementById("submit-btn").disabled = !allAnswered;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                } else {
+                    timeLeft--;
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    document.getElementById("time").innerText = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                    document.getElementById("progress ").style.width = `${((300 - timeLeft) / 300) * 100}%`;
+
+                    // Warning for 1 minute left
+                    if (timeLeft === 60) {
+                        alert("1 minute left!");
+                    }
+                }
+            }, 1000);
+        }
+
+        function submitQuiz() {
+    clearInterval(timerInterval);
+    let correctAnswers = 0;
+
+    // Iterate through each question
+    currentQuestions.forEach((question, index) => {
+        const selectedOption = document.querySelector(`input[name="question-${index}"]:checked`);
+        const questionDiv = document.querySelectorAll(".question")[index]; // Get the question block
+
+        if (selectedOption) {
+            const correctAnswer = question.answer; // Ensure this matches the correct question
+            if (selectedOption.value === correctAnswer) {
+                correctAnswers++;
+                questionDiv.classList.add("correct-answer"); // Add green highlight for correct answers
+            } else {
+                questionDiv.classList.add("incorrect-answer"); // Add red highlight for incorrect answers
+            }
+        } else {
+            questionDiv.classList.add("incorrect-answer"); // If no answer is selected, mark as incorrect
+        }
+    });
+
+    displayResults(correctAnswers);
+}
+        function displayResults(correctAnswers) {
+            document.getElementById("correct-answers").innerText = correctAnswers;
+            document.getElementById("incorrect-answers").innerText = totalQuestions - correctAnswers;
+
+            document.getElementById("result").classList.remove("hidden");
+        }
+
+        function restartQuiz() {
+            timeLeft = 300;
+            document.getElementById("result").classList.add("hidden");
+            loadQuiz();
+        }
+
+        loadQuiz();
+    </script>
+</body>
+</html>

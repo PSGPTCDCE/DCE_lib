@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Networking Quiz</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #87CEEB, #ADD8E6);
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            margin: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            text-align: center;
+            color: #1E90FF;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            height: 15px;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #1E90FF, #87CEEB);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .question:hover {
+            transform: translateY(-5px);
+        }
+
+        .question p {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #444;
+        }
+
+        .options label {
+            display: block;
+            margin: 10px 0;
+            padding: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .options label:hover {
+            background: #f1f1f1;
+            border-color: #1E90FF;
+        }
+
+        .options input[type="radio"]:checked + label {
+            background: #1E90FF;
+            color: white;
+            border-color: #1E90FF;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #1E90FF, #87CEEB);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(30, 144, 255, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .result h2 {
+            color: #1E90FF;
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        .result p {
+            margin: 10px 0;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        .correct {
+            color: #2ecc71;
+        }
+
+        .incorrect {
+            color: #e74c3c;
+        }
+
+        .correct-answer {
+            background-color: #d4edda; /* Light green background */
+            border: 2px solid #c3e6cb; /* Green border */
+        }
+
+        .incorrect-answer {
+            background-color: #f8d7da; /* Light red background */
+            border: 2px solid #f5c6cb; /* Red border */
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .timer {
+                font-size: 1.2em;
+            }
+
+            .question {
+                padding: 15px;
+            }
+
+            .options label {
+                padding: 10px;
+            }
+
+            button {
+                padding: 12px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Networking Quiz</h1>
+        <div class="timer">Time Left: <span id="time">05:00</span></div>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div id="quiz"></div>
+        <button id="submit-btn" onclick="submitQuiz()" disabled>Submit</button>
+        <div id="result" class="hidden result">
+            <h2>Your Results 🎉</h2>
+            <p>Correct Answers: <span id="correct-answers" class="correct"></span> ✅</p>
+            <p>Incorrect Answers: <span id="incorrect-answers" class="incorrect"></span> ❌</p>
+            <button onclick="restartQuiz()">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const categories = {
+            "Networking": [
+                { question: "IGMP stands for____________.", options: ["A) Internet Group Management Protocol", "B) Instagram Pic", "C) Instagram Photo", "D) IG Map"], answer: "A) Internet Group Management Protocol" },
+                { question: "PAN stands for _________.", options: ["A) Personal Area Network", "B) Prompt Area Network", "C) Private Area Network", "D) Pear Area Network"], answer: "A) Personal Area Network" },
+                { question: "LAN stands for_______", options: ["A) Local Area Network", "B) Line Area Network", "C) Live Area Network", "D) Long Area Network"], answer: "A) Local Area Network" },
+                { question: "CAN stands for _______.", options: ["A) Campus Area Network", "B) College Area Network", "C) Center Area Network", "D) Close Area Network"], answer: "A) Campus Area Network" },
+                { question: "WAN stands for _______.", options: ["A) Wide Area Network", "B) Wireless Area Network", "C) Wast Area Network", "D) Work Area Network"], answer: "A) Wide Area Network" },
+                { question: "GAN stands for__________", options: ["A) Global Area Network", "B) Ground Area Network", "C) Gold Area Network", "D) Globe Access Network"], answer: "A) Global Area Network" },
+                { question: "ISP stands for_______.", options: ["A) Internet Service Provider", "B) Indian Special Police", "C) International Service Provider", "D) Inspiration"], answer: "A) Internet Service Provider" },
+                { question: "IPS stands for _______.", options: ["A) In Plane Switching", "B) Instructions Per Second", "C) Indian Police Service", "D) Both A and B"], answer: "D) Both A and B" },
+                { question: "NTP stands for _______.", options: ["A) Network Time Protocol", "B) New Terminal Point", "C) Network Time Policy", "D) Network Term Policy"], answer: "A) Network Time Protocol" },
+                { question: "SMS stands for________.", options: ["A) Short Message Service", "B) Small Message Service", "C) Special Message Service", "D) Short Module Set"], answer: "A) Short Message Service" },
+                { question: "SMTP stands for ________.", options: ["A) Simple Mail Transfer Protocol", "B) Short Message Transfer Protocol", "C) Small Message Test Protocol", "D) Super Message Test Protocol"], answer: "A) Simple Mail Transfer Protocol" },
+                { question: "TCP stands for _____", options: ["A) Transmission Control Protocol", "B) Time Control Protocol", "C) Total Control Protocol", "D) Transmission Circuit Protocol"], answer: "A) Transmission Control Protocol" },
+                { question: "TN stands for _______.", options: ["A) Twisted Nematic", "B) Total Number", "C) Trial Network", "D) Traffic Network"], answer: "A) Twisted Nematic" },
+                { question: "URL stands for _______.", options: ["A) Union Resource Locator", "B) Uniform Resource Locator", "C) Union Relay Light", "D) Under Relay Light"], answer: "B) Uniform Resource Locator" },
+                { question: "NTP stands for _________.", options: ["A) Network Time Protocol", "B) New Time Protocol", "C) Network Threat Protocol", "D) Network Term Policy"], answer: "A) Network Time Protocol" },
+                { question: "WWW stands for __________.", options: ["A) World Wide Web", "B) Whole World Web", "C) World Wide Wire", "D) Weird World Web"], answer: "A) World Wide Web" },
+                { question: "The protocol used to automatically assign IP addresses to a newly connected host in a network is called ______.", options: ["A) Dynamic Host Configuration Protocol (DHCP)", "B) Transmission Control Protocol (TCP)", "C) User Datagram Protocol (UDP)", "D) File Transfer Protocol (FTP)"], answer: "A) Dynamic Host Configuration Protocol (DHCP)" },
+                { question: "Third generation of firewall offers_____ to prevent web fingerprint attacks.", options: ["A) Web Application Firewall", "B) Packet Filter", "C) Stateful Filter", "D) None of them"], answer: "A) Web Application Firewall" },
+                { question: "Who invented WWW?", options: ["A) Bob Kahn", "B) Tim Berners-Lee", "C) Vint Cerf", "D) Lady Ada Lovelace"], answer: "B) Tim Berners-Lee" },
+                { question: "WWW was invented in the year__________.", options: ["A) 1989", "B) 1984", "C) 1999", "D) 1985"], answer: "A) 1989" },
+                { question: "TLD stands for_________.", options: ["A) Time Limit Domain", "B) Top Level Domain", "C) Try Low Level Domain", "D) Tata Limited Department"], answer: "B) Top Level Domain" },
+                { question: "URL stands for________.", options: ["A) User Relation Line", "B) Uniform Resource Locator", "C) Union Relay Line", "D) User Roll Lime"], answer: "B) Uniform Resource Locator" },
+                { question: "“.com” domain definition is ________.", options: ["A) Government", "B) Education", "C) Commercial", "D) International"], answer: "C) Commercial" },
+                { question: "DNS stands for ________.", options: ["A) Digital Name System", "B) Domain Name System", "C) Direct Name System", "D) Digital Name Subscribe"], answer: "B) Domain Name System" },
+                { question: "Communication means_________.", options: ["A) Sending or receiving information", "B) Sending information", "C) Receiving information", "D) None of these"], answer: "A) Sending or receiving information" },
+                { question: "The identity management system binds logical addresses to ______ for reputed servers.", options: ["A) MAC Address", "B) Specific Programs", "C) Other Computers", "D) None of them"], answer: "A) MAC Address" },
+                { question: "Exchange of data between two devices using some form of transmission media is called _________.", options: ["A) Technology", "B) Data Communication", "C) Recording", "D) Tracking"], answer: "B) Data Communication" },
+                { question: "IPS in firewall stands for ______.", options: ["A) Intrusion Protection System", "B) Intrusion Prevention Software", "C) Internet Prevention System", "D) Intrusion Prevention System"], answer: "D) Intrusion Prevention System" },
+                { question: "When data can transfer both sides but at a time only one direction can send information is called______.", options: ["A) Half Duplex", "B) Simplex", "C) Full Duplex", "D) Communication"], answer: "A) Half Duplex" },
+                { question: "When data can transfer both sides at the same time data transmission is called _________.", options: ["A) Half Duplex", "B) Simplex", "C) Full Duplex", "D) Communication"], answer: "C) Full Duplex" },
+                { question : "Telnet stands for_________.", options: ["A) Telecommunication Network", "B) Telephone Net", "C) Tele Net", "D) Tele Network"], answer: "A) Telecommunication Network" },
+                { question: "NFS stands for__________.", options: ["A) New File System", "B) Network File System", "C) New File Storage", "D) Need File Storage"], answer: "B) Network File System" },
+                { question: "NAS stands for _______.", options: ["A) Network Attached Storage", "B) Network Access Storage", "C) Network Activity Sport", "D) New Active System"], answer: "A) Network Attached Storage" },
+                { question: "Third generation firewalls were otherwise called______.", options: ["A) Packet Filters", "B) Stateful Filters", "C) Application Filters", "D) None of them"], answer: "C) Application Filters" },
+                { question: "SSH stands for __________.", options: ["A) Secure Socket Shell", "B) Secure Shell", "C) Both A and B", "D) Secure Session Hall"], answer: "C) Both A and B" },
+                { question: "NETBIOS stands for___________.", options: ["A) Network Basic Input Output System", "B) Network Bill Open", "C) Network Basic Inter OS", "D) Network Bulls"], answer: "A) Network Basic Input Output System" },
+                { question: "RPC stands for______.", options: ["A) Relay Point Company", "B) Remote Procedure Call", "C) Right Police Company", "D) Ray Privacy"], answer: "B) Remote Procedure Call" },
+                { question: "UDP stands for_________.", options: ["A) User Datagram Protocol", "B) Uniq Data Protocol", "C) User Diagram Protocol", "D) User Data Policy"], answer: "A) User Datagram Protocol" },
+                { question: "IPSEC stands for__________.", options: ["A) Input Second", "B) IP Security", "C) Input Secondary", "D) Inline Point Section"], answer: "B) IP Security" },
+                { question: "IETF stands for___________.", options: ["A) Internet Engineering Task Force", "B) Internet Force", "C) Intel Telephone", "D) Intex Phone"], answer: "A) Internet Engineering Task Force" },
+                { question: "In fibre optics, the signal source is ___ waves.", options: ["A) Light", "B) Radio", "C) Infrared", "D) Very Low Frequency"], answer: "A) Light" },
+                { question: "The ___ layer is responsible for node-to-node packet delivery.", options: ["A) Session", "B) Network", "C) Physical", "D) Data Link"], answer: "D) Data Link" },
+                { question: "The speed mismatch between the sender and the receiver is called ___.", options: ["A) Error Control", "B) Speed Error", "C) Flow Control", "D) Transmission Control"], answer: "C) Flow Control" },
+                { question: "FTP runs exclusively over ___.", options: ["A) HTTP", "B) TCP", "C) SMTP", "D) HTML"], answer: "B) TCP" },
+                { question: "BSC is developed by ___.", options: ["A) Motorola", "B) IBM", "C) Nokia", "D) Toshiba"], answer: "B) IBM" },
+                { question: "Which of the following primarily uses guided media?", options: ["A) Cellular Telephone System", "B) Local Telephone System", "C) Satellite Communications", "D) Radio Broadcasting"], answer: "B) Local Telephone System" },
+                { question: "When discussing unguided media, we usually refer to ___.", options: ["A) Metallic Wires", "B) Nonmetallic Wires", "C) The Atmosphere", "D) None of the Above"], answer: "C) The Atmosphere" },
+                { question: "This is the ability to increase system performance gradually as the workload grows just by adding processors.", options: ["A) Multipliability", "B) Inheritance", "C) Scalability", "D) Vectorization"], answer: "C) Scalability" },
+                { question: "PSTN represents ___.", options: ["A) Private Switched Transmission Network", "B) Public Switched Telephone Network", "C) Private Switched Telephone Network", "D) Public Switched Transmission Network"], answer: "B) Public Switched Telephone Network" },
+                { question: "SMTP refers to ___.", options: ["A) Simple Mail Transfer Protocol", "B) Small Mail Transfer Protocol", "C) Simple Mass Transfer Protocol", "D) Small Mail Transfer Protocol"], answer: "A) Simple Mail Transfer Protocol" },
+                { question: "Class A, Class B, and Class C together are referred to as ___ addressing or primary address class if the IP.", options: ["A) Classful", "B) Eventful", "C) Graded", "D) Ranked"], answer: "A) Classful" },
+                { question: "___ overcame the registered number issue by assigning each organization one network number from the IPv4 address space.", options: ["A) Tracking", "B) Subnetting", "C) Packeting", "D) Switching"], answer: "B) Subnetting" },
+                { question: "Equipment that controls the physical and electrical termination of the ISDN at the user’s premises is called ___.", options: ["A) NT1", "B) NT2", "C) NT3", "D) NT4"], answer: "A) NT1" },
+                { question: "A data channel contains ___.", options: ["A) Control Information", "B) Management Information", "C) Miscellaneous Functions", "D) User Data/Information"], answer: "D) User Data/Information" },
+                { question: "QOS represents ___.", options: ["A) Quality of System", "B) Quality of Service", "C) Queue of System", "D) Queue of Service"], answer: "B) Quality of Service" },
+                { question: "ISDN is an acronym for ___.", options: ["A) Information Services for Digital Networks", "B) Internetwork System for Data Networks", "C) Integrated Services Digital Networks", "D) Integrated Signals Digital Network"], answer: "C) Integrated Services Digital Networks" },
+                { question: "Data rate depends on three factors", options: ["A) Bandwidth Available", "B) Level of the Signals We Use", "C) Quality of the Channel", "D) All of the Above"], answer: "D) All of the Above" },
+                { question: "Which layer is not really a layer?", options: ["A) Host of the Network", "B) Network to Host", "C) Application to Presentation", "D) None"], answer: "A) Host of the Network" },
+                { question: "Reference point ___ is the specification for connecting NT1 with NT2.", options: ["A) R", "B) S", "C) T", "D) U"], answer: "C) T" },
+                { question: "The radio communication spectrum is divided into bands based on ___.", options: ["A) Amplitude", "B) Frequency", "C) Cost and Hardware", "D) Transmission Medium"], answer: "B) Frequency" },
+                { question: "Which international agency is concerned with standards in science and technology?", options: ["A) ISO", "B) OSI", "C) EIA", "D) ANSI"], answer: "A) ISO" },
+                { question: "___ blocks are identified using syntax similar to that of IPv4 addresses: a four-part dotted – decimal address following by a slash, then a number from 0 to 32 : A)B)C)D/N.", options: ["A) IPv4 CICR", "B) IPv4 MIDR", "C) IPv4 CIMR", "D) IPv4 CIDR"], answer: "D) IPv4 CIDR" },
+                { question: "The term “email” applies both to the Internet email system based on the ___ and to ___, allowing users within one organization to email each other.", options: ["A) FTP, Intranet Systems", "B) SMTP, Intranet Systems", "C) FTP, Internet Systems", "D) SMTP, Internet Systems"], answer: "B) SMTP, Intranet Systems" },
+                { question: "Which agency created standards for telephone communications (V series) and for network interfaces and public networks (X series)?", options: ["A) ATT", "B) ITU-T", "C) ANSI", "D) ISO"], answer: "B) ITU-T" },
+                { question: "___ CSMA is less greedy whereas ___ CSMA is selfish.", options: ["A) Non-persistent, 1-persistent", "B) 1-persistent, p-persistent", "C) p-persistent, 1-persistent", "D) 1-persistent, non-persistent"], answer: "A) Non-persistent, 1-persistent" },
+                { question: "The BRI is composed of ___.", options: ["A) Two B Channels", "B) One H Channel", "C) One D Channel", "D) A and C"], answer: "D) A and C" },
+                { question: "IP Packet is a ___ and ___ based model.", options: ["A) Connectionless , Network", "B) Connection, Network", "C) Connectionless, Datagram", "D) Connection, Datagram"], answer: "C) Connectionless, Datagram" },
+                { question: "___ are special-interest groups that quickly test, evaluate, and standardize new technologies.", options: ["A) Forums", "B) Regulatory Agencies", "C) Standards Organizations", "D) All of the Above"], answer: "C) Standards Organizations" },
+                { question: "When the angle of refraction is ___, the angle of incidence, the light beam moves from a denser to a less dense medium.", options: ["A) More Than", "B) Less Than", "C) Equal To", "D) None of the Above"], answer: "A) More Than" },
+                { question: "The ALOHA network was created at the University of ___ in 1970 under the leadership of ___.", options: ["A) Hawaii, John Abramson", "B) Texas, John Abramson", "C) Texas, Norman Abramson", "D) Hawaii, Norman Abramson"], answer: "D) Hawaii, Norman Abramson" },
+                { question: "The term used to describe the way in which computers are connected to the network.", options: ["A) Logic", "B) Technology", "C) Topology", "D) All of the Above"], answer: "C) Topology" },
+                { question: "FDM stands for", options: ["A) Fixed Division Multiplexing", "B) First Division Multiplexing", "C) Frequency Division Multiplexing", "D) None"], answer: "C) Frequency Division Multiplexing" },
+                { question: "FDDI stands for", options: ["A) Fixed Distributed Data Interface", "B) First Division Data Interface", "C) Fiber Distributed Data Interface", "D) None"], answer: "C) Fiber Distributed Data Interface" },
+                { question: "The ___ layer is responsible for resolving access to the shared media or resources.", options: ["A) Physical", "B) MAC Sublayer", "C) Network", "D) Transport"], answer: "B) MAC Sublayer" },
+                { question: "Coding can be divided into", options: ["A) Block Coding", "B) Convolution Coding", "C) Both of the Above", "D) None of the Above"], answer: "C) Both of the Above" },
+                { question: "Fiber-optic communication system uses.", options: ["A) Simplex Transmission", "B) Half-Duplex", "C) Full-Duplex", "D) None of the Above"], answer: "C) Full-Duplex" },
+                { question: "Complex routing strategies can be, and are, often used in systems such as ___, ___, or ___, which are sometimes used as underlying technologies to support IP networks.", options: ["A) MPLS, ATM, or Frame Relay", "B) CTLNS, ATM, or Slot", "C) ATM, PDTN, or Slot", "D) LAN, ATM, or Frame Relay"], answer: "A) MPLS, ATM, or Frame Relay" },
+                { question: "The concept of connected computers sharing resources is called ___.", options: ["A) Internetworking", "B) Intranetworking", "C) Networking", "D) None of the Above"], answer: "C) Networking" },
+                { question: "VPN stands for", options: ["A) Virtual Private Network", "B) Visual Private Network", "C) Virtual Public Network", "D) Visual Public Network"], answer: "A) Virtual Private Network" },
+                { question: "IMP stands for", options: ["A) Internal Message Passing", "B) Interface Message Passing", "C) Internal Message Parsing", "D) Interface Message Parsing"], answer: "B) Interface Message Passing" },
+                { question: "Process to process delivery of the entire message is done by", options: ["A) Physical Layer", "B) Transport Layer", "C) Session Layer", "D) Presentation Layer"], answer: "B) Transport Layer" },
+                { question: "Dialog controller role is played by", options: ["A) Session Layer", "B) Application Layer", "C) Transport Layer", "D) Network Layer"], answer: "A) Session Layer" },
+                { question: "Syntax and semantics of the information exchanged between two systems are done by", options: ["A) Session Layer", "B) Application Layer", "C) Transport Layer", "D) Presentation Layer"], answer: "D) Presentation Layer" },
+                { question: "SDU stands for", options: ["A) Service Data Unit", "B) Service Digital Unit", "C) Session Data Unit", "D) Session Data Unit"], answer: "A) Service Data Unit" },
+                { question: "PDU stands for", options: ["A) Power Data Unit", "B) Protocol Digital Unit", "C) Presentation Data Unit", "D) Protocol Data Unit"], answer: "D) Protocol Data Unit" },
+                { question: "Transmission lines suffer from the major problem", options: ["A) Attenuation Distortion", "B) Delay Distortion", "C) Noise", "D) All of the Above"], answer: "D) All of the Above" },
+                { question: "If the value of a signal changes over a very short period, its frequency is ___", options: ["A) Low", "B) High", "C) Average", "D) Zero"], answer: "B) High" },
+                { question: "CRC stands for", options: ["A) Cyclic Redundancy Codes", "B) Code Redundancy Cycle", "C) Critical Redundancy Cycle", "D) None of the Above"], answer: "A) Cyclic Redundancy Codes" },
+                { question: "In ___ type of service, no connection is established beforehand or afterwards.", options: ["A) Acknowledged Connectionless Service", "B) Unacknowledged Connectionless Service", "C) Acknowledged Connection-Oriented Service", "D) Unacknowledged Connection-Oriented Service"], answer: "B) Unacknowledged Connectionless Service" }
+            ]
+        };
+
+        let timeLeft = 300; // 5 minutes in seconds
+        let timerInterval;
+        let totalQuestions = 0;
+        let currentQuestions = []; // Store the current set of questions
+
+        function loadQuiz() {
+            const quizDiv = document.getElementById("quiz");
+            quizDiv.innerHTML = "";
+            totalQuestions = 0;
+            document.getElementById("progress").style.width = '0%'; // Reset progress bar
+            currentQuestions = getAllQuestions(); // Get all questions
+            currentQuestions = shuffleArray(currentQuestions).slice(0, 10); // Shuffle and take 10 questions
+            displayQuestions(); // Call to display questions
+            document.getElementById("submit-btn").disabled = true; // Reset submit button
+            startTimer();
+        }
+
+        function getAllQuestions() {
+            return Object.values(categories).flat();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        function displayQuestions() {
+            const quizDiv = document.getElementById("quiz");
+            quizDiv.innerHTML = ""; // Clear previous questions
+
+            currentQuestions.forEach((q, index) => {
+                const div = document.createElement("div");
+                div.classList.add("question");
+                div.innerHTML = `<p>${q.question}</p>`;
+                
+                const optionsDiv = document.createElement("div");
+                optionsDiv.classList.add("options");
+                
+                q.options.forEach(option => {
+                    const label = document.createElement("label");
+                    const input = document.createElement("input");
+                    input.type = "radio";
+                    input.name = `question-${index}`; // Use index for unique names
+                    input.value = option;
+
+                    // Add event listener to check if all questions are answered
+                    input.addEventListener('change', checkAllAnswered);
+
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(option));
+                    optionsDiv.appendChild(label);
+                });
+                
+                div.appendChild(optionsDiv);
+                quizDiv.appendChild(div);
+            });
+            totalQuestions = currentQuestions.length; // Set total questions
+        }
+
+        function checkAllAnswered() {
+            const allAnswered = document.querySelectorAll('input[type="radio"]:checked').length === totalQuestions;
+            document.getElementById("submit-btn").disabled = !allAnswered;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                } else {
+                    timeLeft--;
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    document.getElementById("time").innerText = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                    document.getElementById("progress").style.width = `${((300 - timeLeft) / 300) * 100}%`;
+
+                    // Warning for 1 minute left
+                    if (timeLeft === 60) {
+                        alert("1 minute left!");
+                    }
+                }
+            }, 1000);
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            let correctAnswers = 0;
+
+            // Iterate through each question
+            currentQuestions.forEach((question, index) => {
+                const selectedOption = document.querySelector(`input[name="question-${index}"]:checked`);
+                if (selectedOption) {
+                    const correctAnswer = question.answer; // Ensure this matches the correct question
+                    if (selectedOption.value === correctAnswer) {
+                        correctAnswers++;
+                    }
+                }
+            });
+
+            displayResults(correctAnswers);
+        }
+
+        function displayResults(correctAnswers) {
+            document.getElementById("correct-answers").innerText = correctAnswers;
+            document.getElementById("incorrect-answers").innerText = totalQuestions - correctAnswers;
+
+            // Highlight the questions based on correctness
+            currentQuestions.forEach((question, index) => {
+                const selectedOption = document.querySelector(`input[name="question-${index}"]:checked`);
+                const questionBlock = document.querySelectorAll('.question')[index]; // Get the question block
+
+                if (selectedOption) {
+                    const correctAnswer = question.answer; // Get the correct answer
+                    if (selectedOption.value === correctAnswer) {
+                        questionBlock.classList.add('correct-answer'); // Highlight correct answer
+                    } else {
+                        questionBlock.classList.add('incorrect-answer'); // Highlight incorrect answer
+                    }
+                } else {
+                    questionBlock.classList.add('incorrect-answer'); // If no answer was selected, mark as incorrect
+                }
+            });
+
+            document.getElementById("result").classList.remove("hidden");
+        }
+
+        function restartQuiz() {
+            timeLeft = 300;
+            document.getElementById("result").classList.add("hidden");
+            loadQuiz();
+        }
+
+        loadQuiz();
+    </script>
+</body>
+</html>
